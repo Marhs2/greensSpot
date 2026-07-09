@@ -152,7 +152,9 @@ async def resolve_region(region_name: str) -> Optional[Dict[str, Any]]:
     keyword = region_name
     norm_keyword = keyword.replace(" ", "")
     try:
-        async with httpx.AsyncClient(timeout=20.0) as http:
+        # http2=False: 일부 클라우드에서 VWorld HTTP/2 끊김 완화
+        timeout = httpx.Timeout(25.0, connect=10.0)
+        async with httpx.AsyncClient(timeout=timeout, http2=False, follow_redirects=True) as http:
             for attr in (
                 f"sig_kor_nm:like:{keyword}",
                 f"full_nm:like:{keyword}",
@@ -351,7 +353,8 @@ async def live_search(criteria: Dict[str, Any]) -> Dict[str, Any]:
     seen_pnu: set[str] = set()
 
     try:
-        async with httpx.AsyncClient(timeout=25.0) as http:
+        timeout = httpx.Timeout(30.0, connect=10.0)
+        async with httpx.AsyncClient(timeout=timeout, http2=False, follow_redirects=True) as http:
             emd_codes = await _emd_codes_in_bbox(
                 client, http, region["bbox"], region["sig_cd"], neighborhood
             )

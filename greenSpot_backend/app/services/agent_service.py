@@ -128,25 +128,34 @@ def _score_for_use_parcel(parcel: Dict[str, Any], use: Optional[str] = None) -> 
     return _top_score(parcel)
 
 
-async def search_parcels_by_criteria(db: AsyncSession, criteria: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """VWorld 실시간 검색 우선, API 키 없을 때만 DB 폴백."""
-    if settings.vworld_api_key:
+async def search_parcels_by_criteria(
+    db: AsyncSession,
+    criteria: Dict[str, Any],
+    *,
+    allow_live: bool = True,
+) -> List[Dict[str, Any]]:
+    """VWorld 실시간 검색 우선(allow_live), 실패·비활성 시 DB 폴백."""
+    if allow_live and settings.vworld_api_key:
         try:
             payload = await live_search(criteria)
-            if payload.get("message") and not payload.get("results"):
-                return []
-            return payload.get("results") or []
+            if payload.get("results"):
+                return payload.get("results") or []
+            # live 가 빈 결과/에러 메시지만 주면 DB 로 이어감
         except VWorldDiscoveryError:
             pass
 
     district = criteria.get("district")
     preferred = criteria.get("topRecommendation")
     strict_top = bool(criteria.get("strictTopRecommendation"))
-    parcels, _ = await get_all_parcels(db, district=district, parcel_type=criteria.get("parcelType"))
+    # district 필터는 아래에서 partial match — get_all 은 전체 로드 후 필터
+    parcels, _ = await get_all_parcels(db, district=None, parcel_type=criteria.get("parcelType"))
     filtered: List[Dict[str, Any]] = []
     for p in parcels:
-        if district and p.get("district") != district:
-            continue
+        if district:
+            pd = (p.get("district") or "").replace(" ", "")
+            want = district.replace(" ", "")
+            if want not in pd and pd not in want:
+                continue
         scores = p.get("scores") or {}
         # 용도 키워드(수목/텃밭/태양광)는 정렬 우선 — 1위 불일치로 전부 버리지 않음
         if preferred and strict_top:
@@ -185,6 +194,7 @@ async def ai_search(db: AsyncSession, query: str) -> Dict[str, Any]:
     criteria = _extract_criteria_from_query(query)
 
     live_msg: Optional[str] = None
+    results: List[Dict[str, Any]] = []
     if settings.vworld_api_key:
         try:
             payload = await live_search(criteria)
@@ -196,11 +206,22 @@ async def ai_search(db: AsyncSession, query: str) -> Dict[str, Any]:
             results = []
             live_msg = str(e)
         except Exception as e:
-            # httpx/network 등 미처리 예외가 500+CORS 누락으로 브라우저에 보이지 않게 함
-            results = await search_parcels_by_criteria(db, criteria)
-            live_msg = f"실시간 검색 일시 실패, DB 폴백: {e}"
-            if not results:
-                live_msg = f"실시간 검색에 실패했습니다. 잠시 후 다시 시도해 주세요. ({e})"
+            results = []
+            live_msg = f"실시간 검색 일시 실패: {type(e).__name__}"
+
+        # VWorld 실패·빈 결과 시 DB 시드 폴백 (Render 등 해외 호스트에서 VWorld 차단되는 경우)
+        if not results:
+            db_results = await search_parcels_by_criteria(db, criteria, allow_live=False)
+            if db_results:
+                results = db_results
+                note = live_msg or "VWorld 실시간 불가"
+                live_msg = f"{note} — DB 시드 데이터로 표시합니다."
+            elif live_msg:
+                live_msg = (
+                    f"{live_msg} "
+                    "Render 등 해외 서버에서는 VWorld 연결이 막힐 수 있습니다. "
+                    "로컬 실행 또는 시드 데이터(python -m scripts.seed)를 확인하세요."
+                )
     else:
         results = await search_parcels_by_criteria(db, criteria)
 
