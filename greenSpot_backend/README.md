@@ -4,6 +4,9 @@ FastAPI 기반 GreenSpot 백엔드. VWorld 실시간 필지 + 공공 API enrich 
 
 ## 설치
 
+Python **3.10–3.12** 권장 (3.13+ 는 고정된 `pydantic` 휠이 없을 수 있음).  
+Render 배포 시 이 디렉터리의 `.python-version` (`3.12`) 을 사용하거나, 대시보드 Environment 에 `PYTHON_VERSION=3.12.11` 을 설정하세요.
+
 ```bash
 pip install -r requirements.txt
 ```

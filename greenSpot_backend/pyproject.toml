@@ -2,7 +2,7 @@
 name = "greenspot-api"
 version = "1.0.0"
 description = "GreenSpot API - FastAPI based"
-requires-python = ">=3.9"
+requires-python = ">=3.10,<3.14"
 
 [tool.uvicorn]
 host = "0.0.0.0"
