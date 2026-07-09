@@ -1,0 +1,156 @@
+# =========================
+# GreenSpot monorepo
+# =========================
+
+# ----- Secrets / env -----
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.env
+!*.env.example
+.envrc
+.flaskenv
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials.json
+service-account*.json
+gee-*.json
+**/secrets/**
+*.secret
+
+# ----- OS -----
+.DS_Store
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+ehthumbs.db
+
+# ----- Editors / IDE -----
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ----- Python (backend) -----
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.cache/
+coverage.xml
+*.cover
+.python-version
+
+# Local DB / runtime
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+greenspot.db
+
+# Accidental package name artifacts
+=0.*
+
+# ----- Node / frontend -----
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.pnp.*
+dist/
+dist-ssr/
+.vite/
+*.local
+.turbo/
+.next/
+out/
+.nuxt/
+.output/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Test / coverage (frontend)
+coverage/
+*.lcov
+.nyc_output/
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# ----- Tooling / local session junk -----
+.kimchi/
+terminals/
+.grok/
+.cursor/
+.agents/
+mcps/
+.pytest_cache/
+
+# Local scratch
+code.txt
+*.bak
+*.tmp
+tmp/
+temp/
+.temp/
+
+# Media generated locally (optional)
+images/
+videos/

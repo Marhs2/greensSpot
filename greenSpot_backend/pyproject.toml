@@ -1,0 +1,10 @@
+[project]
+name = "greenspot-api"
+version = "1.0.0"
+description = "GreenSpot API - FastAPI based"
+requires-python = ">=3.9"
+
+[tool.uvicorn]
+host = "0.0.0.0"
+port = 8000
+reload = true
