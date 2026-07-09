@@ -719,15 +719,36 @@ class VWorldDataClient:
             "format": "json",
         }
         base.update(params)
-        resp = await client.get(VWORLD_DATA_URL, params=base)
-        resp.raise_for_status()
-        payload = resp.json()
-        response = payload.get("response") or {}
-        status = response.get("status")
-        if status == "ERROR":
-            err = response.get("error") or {}
-            raise VWorldDiscoveryError(err.get("text") or "VWorld API error")
-        return response
+        last_exc: Optional[Exception] = None
+        for attempt in range(3):
+            try:
+                resp = await client.get(VWORLD_DATA_URL, params=base)
+                if resp.status_code in (502, 503, 504) and attempt < 2:
+                    await asyncio.sleep(0.4 * (attempt + 1))
+                    continue
+                resp.raise_for_status()
+                payload = resp.json()
+                response = payload.get("response") or {}
+                status = response.get("status")
+                if status == "ERROR":
+                    err = response.get("error") or {}
+                    raise VWorldDiscoveryError(err.get("text") or "VWorld API error")
+                return response
+            except VWorldDiscoveryError:
+                raise
+            except httpx.HTTPError as e:
+                last_exc = e
+                code = getattr(getattr(e, "response", None), "status_code", None)
+                if code in (502, 503, 504) and attempt < 2:
+                    await asyncio.sleep(0.4 * (attempt + 1))
+                    continue
+                raise VWorldDiscoveryError(
+                    f"VWorld API 연결 실패 (HTTP {code or 'network'}). "
+                    "VWORLD_API_KEY / VWORLD_DOMAIN 을 확인하세요."
+                ) from e
+        raise VWorldDiscoveryError(
+            f"VWorld API 연결 실패: {type(last_exc).__name__ if last_exc else 'unknown'}"
+        )
 
     async def fetch_seoul_emd_codes(self) -> List[str]:
         min_lng, min_lat, max_lng, max_lat = SEOUL_BBOX
