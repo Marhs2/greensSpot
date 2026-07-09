@@ -77,6 +77,7 @@ def extract_neighborhood(query: str) -> Optional[str]:
 
 async def _data_get(client: VWorldDataClient, http, params: Dict[str, Any]) -> Dict[str, Any]:
     from app.services.vworld_discovery_service import VWORLD_DATA_URL
+    import httpx
 
     base = {
         "service": "data",
@@ -87,9 +88,38 @@ async def _data_get(client: VWorldDataClient, http, params: Dict[str, Any]) -> D
         "format": "json",
     }
     base.update(params)
-    resp = await http.get(VWORLD_DATA_URL, params=base)
-    resp.raise_for_status()
-    return resp.json().get("response") or {}
+    last_err: Optional[Exception] = None
+    # VWorld 일시 502/503 대비 재시도 (키/URL 은 로그·메시지에 남기지 않음)
+    for attempt in range(3):
+        try:
+            resp = await http.get(VWORLD_DATA_URL, params=base)
+            if resp.status_code in (502, 503, 504) and attempt < 2:
+                logger.warning("VWorld HTTP %s (attempt %s), retrying", resp.status_code, attempt + 1)
+                await asyncio.sleep(0.4 * (attempt + 1))
+                continue
+            resp.raise_for_status()
+            body = resp.json().get("response") or {}
+            if body.get("status") == "ERROR":
+                err = body.get("error") or {}
+                text = err.get("text") or "VWorld API error"
+                code = err.get("code") or ""
+                raise VWorldDiscoveryError(f"{text}" + (f" ({code})" if code else ""))
+            return body
+        except VWorldDiscoveryError:
+            raise
+        except (httpx.HTTPError, httpx.InvalidURL, ValueError) as e:
+            last_err = e
+            status = getattr(getattr(e, "response", None), "status_code", None)
+            if status in (502, 503, 504) and attempt < 2:
+                logger.warning("VWorld request error HTTP %s (attempt %s), retrying", status, attempt + 1)
+                await asyncio.sleep(0.4 * (attempt + 1))
+                continue
+            logger.warning("VWorld data request failed: %s", type(e).__name__)
+            raise VWorldDiscoveryError(
+                f"VWorld API 연결 실패 (HTTP {status or 'network'}). "
+                "VWORLD_API_KEY / VWORLD_DOMAIN 과 VWorld 서비스 상태를 확인하세요."
+            ) from e
+    raise VWorldDiscoveryError(f"VWorld API 연결 실패: {type(last_err).__name__ if last_err else 'unknown'}")
 
 
 def _bbox_from_geometry(geometry: Optional[Dict[str, Any]]) -> Optional[Tuple[float, float, float, float]]:
@@ -121,40 +151,46 @@ async def resolve_region(region_name: str) -> Optional[Dict[str, Any]]:
     client._check_key()
     keyword = region_name
     norm_keyword = keyword.replace(" ", "")
-    async with httpx.AsyncClient(timeout=20.0) as http:
-        for attr in (
-            f"sig_kor_nm:like:{keyword}",
-            f"full_nm:like:{keyword}",
-        ):
-            response = await _data_get(client, http, {
-                "data": SIGG_DATA,
-                "size": 10,
-                "page": 1,
-                "attrFilter": attr,
-                "geometry": "true",
-                "attribute": "true",
-                "crs": "EPSG:4326",
-            })
-            if response.get("status") != "OK":
-                continue
-            feats = response.get("result", {}).get("featureCollection", {}).get("features", [])
-            for feat in feats:
-                props = feat.get("properties") or {}
-                kor = props.get("sig_kor_nm") or ""
-                full = props.get("full_nm") or ""
-                norm_kor = kor.replace(" ", "")
-                norm_full = full.replace(" ", "")
-                if norm_keyword not in norm_kor and norm_keyword not in norm_full and keyword not in kor:
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as http:
+            for attr in (
+                f"sig_kor_nm:like:{keyword}",
+                f"full_nm:like:{keyword}",
+            ):
+                response = await _data_get(client, http, {
+                    "data": SIGG_DATA,
+                    "size": 10,
+                    "page": 1,
+                    "attrFilter": attr,
+                    "geometry": "true",
+                    "attribute": "true",
+                    "crs": "EPSG:4326",
+                })
+                if response.get("status") != "OK":
                     continue
-                bbox = _bbox_from_geometry(feat.get("geometry"))
-                if not bbox:
-                    continue
-                return {
-                    "name": kor or region_name,
-                    "full_name": full,
-                    "sig_cd": str(props.get("sig_cd", "")),
-                    "bbox": bbox,
-                }
+                feats = response.get("result", {}).get("featureCollection", {}).get("features", [])
+                for feat in feats:
+                    props = feat.get("properties") or {}
+                    kor = props.get("sig_kor_nm") or ""
+                    full = props.get("full_nm") or ""
+                    norm_kor = kor.replace(" ", "")
+                    norm_full = full.replace(" ", "")
+                    if norm_keyword not in norm_kor and norm_keyword not in norm_full and keyword not in kor:
+                        continue
+                    bbox = _bbox_from_geometry(feat.get("geometry"))
+                    if not bbox:
+                        continue
+                    return {
+                        "name": kor or region_name,
+                        "full_name": full,
+                        "sig_cd": str(props.get("sig_cd", "")),
+                        "bbox": bbox,
+                    }
+    except VWorldDiscoveryError:
+        raise
+    except Exception as e:
+        logger.warning("resolve_region failed for %r: %s", region_name, e)
+        raise VWorldDiscoveryError(f"행정구역 조회 실패: {e}") from e
     return None
 
 
@@ -287,7 +323,14 @@ async def live_search(criteria: Dict[str, Any]) -> Dict[str, Any]:
             "message": "지역을 입력해 주세요. 예: 용산구, 해운대구, 성남시, 제주시",
         }
 
-    region = await resolve_region(region_name)
+    try:
+        region = await resolve_region(region_name)
+    except VWorldDiscoveryError as e:
+        return {
+            "results": [],
+            "meta": {"source": "vworld_live", "region": region_name, "error": "upstream"},
+            "message": f"VWorld 실시간 검색에 실패했습니다. ({e})",
+        }
     if not region:
         return {
             "results": [],
@@ -307,62 +350,76 @@ async def live_search(criteria: Dict[str, Any]) -> Dict[str, Any]:
     candidates: List[Dict[str, Any]] = []
     seen_pnu: set[str] = set()
 
-    async with httpx.AsyncClient(timeout=25.0) as http:
-        emd_codes = await _emd_codes_in_bbox(
-            client, http, region["bbox"], region["sig_cd"], neighborhood
-        )
-        if not emd_codes:
-            return {
-                "results": [],
-                "meta": {"source": "vworld_live", "region": region["name"]},
-                "message": f"{region['name']}에서 읍면동 데이터를 찾지 못했습니다.",
-            }
+    try:
+        async with httpx.AsyncClient(timeout=25.0) as http:
+            emd_codes = await _emd_codes_in_bbox(
+                client, http, region["bbox"], region["sig_cd"], neighborhood
+            )
+            if not emd_codes:
+                return {
+                    "results": [],
+                    "meta": {"source": "vworld_live", "region": region["name"]},
+                    "message": f"{region['name']}에서 읍면동 데이터를 찾지 못했습니다.",
+                }
 
-        # 실시간 응답: 읍면동 샘플 수 제한 (속도 우선)
-        max_emd = 12 if neighborhood else 8
-        step = max(1, len(emd_codes) // max_emd)
-        sampled = emd_codes[::step][:max_emd]
+            # 실시간 응답: 읍면동 샘플 수 제한 (속도 우선)
+            max_emd = 12 if neighborhood else 8
+            step = max(1, len(emd_codes) // max_emd)
+            sampled = emd_codes[::step][:max_emd]
 
-        # 1) 후보 필지 수집 (enrich 없이 빠름)
-        feature_picks: List[Dict[str, Any]] = []
-        for emd_cd in sampled:
-            feats, _ = await data_client.fetch_cadastral_by_emd(emd_cd, page=1, size=40)
-            picks: List[Dict[str, Any]] = []
-            for feat in feats:
-                props = feat.get("properties") or {}
-                pnu = str(props.get("pnu") or "")
-                if not pnu or pnu in seen_pnu:
+            # 1) 후보 필지 수집 (enrich 없이 빠름)
+            feature_picks: List[Dict[str, Any]] = []
+            for emd_cd in sampled:
+                feats, _ = await data_client.fetch_cadastral_by_emd(emd_cd, page=1, size=40)
+                picks: List[Dict[str, Any]] = []
+                for feat in feats:
+                    props = feat.get("properties") or {}
+                    pnu = str(props.get("pnu") or "")
+                    if not pnu or pnu in seen_pnu:
+                        continue
+                    area = geometry_area_sqm(feat.get("geometry"))
+                    if area < min_area or area > max_area:
+                        continue
+                    picks.append({**feat, "_area": area})
+                if not picks:
                     continue
-                area = geometry_area_sqm(feat.get("geometry"))
-                if area < min_area or area > max_area:
-                    continue
-                picks.append({**feat, "_area": area})
-            if not picks:
-                continue
-            picks.sort(key=lambda f: f["_area"], reverse=True)
-            top = picks[0]
-            pnu = str((top.get("properties") or {}).get("pnu") or "")
-            if pnu and pnu not in seen_pnu:
-                seen_pnu.add(pnu)
-                feature_picks.append(top)
-            if len(feature_picks) >= limit * 2:
-                break
+                picks.sort(key=lambda f: f["_area"], reverse=True)
+                top = picks[0]
+                pnu = str((top.get("properties") or {}).get("pnu") or "")
+                if pnu and pnu not in seen_pnu:
+                    seen_pnu.add(pnu)
+                    feature_picks.append(top)
+                if len(feature_picks) >= limit * 2:
+                    break
 
-        # 2) 상세 enrich 병렬 (동시 4개)
-        sem = asyncio.Semaphore(4)
+            # 2) 상세 enrich 병렬 (동시 4개)
+            sem = asyncio.Semaphore(4)
 
-        async def _enrich(feat: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-            async with sem:
-                try:
-                    return await build_parcel_from_feature(feat, enrich_regulations=True)
-                except Exception:
-                    return None
+            async def _enrich(feat: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+                async with sem:
+                    try:
+                        return await build_parcel_from_feature(feat, enrich_regulations=True)
+                    except Exception:
+                        return None
 
-        if feature_picks:
-            rows = await asyncio.gather(*[_enrich(f) for f in feature_picks])
-            for row in rows:
-                if row and row.get("pnu"):
-                    candidates.append(row)
+            if feature_picks:
+                rows = await asyncio.gather(*[_enrich(f) for f in feature_picks])
+                for row in rows:
+                    if row and row.get("pnu"):
+                        candidates.append(row)
+    except VWorldDiscoveryError as e:
+        return {
+            "results": [],
+            "meta": {"source": "vworld_live", "region": region.get("name", region_name), "error": "upstream"},
+            "message": f"VWorld 실시간 검색에 실패했습니다. ({e})",
+        }
+    except Exception as e:
+        logger.warning("live_search failed for %r: %s", region_name, e)
+        return {
+            "results": [],
+            "meta": {"source": "vworld_live", "region": region.get("name", region_name), "error": "upstream"},
+            "message": f"VWorld 실시간 검색에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+        }
 
     preferred = criteria.get("topRecommendation")  # TREE/GARDEN/SOLAR — 정렬 우선, 기본은 하드 필터 아님
     strict_top = bool(criteria.get("strictTopRecommendation"))

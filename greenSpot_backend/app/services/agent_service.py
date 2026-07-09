@@ -195,6 +195,12 @@ async def ai_search(db: AsyncSession, query: str) -> Dict[str, Any]:
         except VWorldDiscoveryError as e:
             results = []
             live_msg = str(e)
+        except Exception as e:
+            # httpx/network 등 미처리 예외가 500+CORS 누락으로 브라우저에 보이지 않게 함
+            results = await search_parcels_by_criteria(db, criteria)
+            live_msg = f"실시간 검색 일시 실패, DB 폴백: {e}"
+            if not results:
+                live_msg = f"실시간 검색에 실패했습니다. 잠시 후 다시 시도해 주세요. ({e})"
     else:
         results = await search_parcels_by_criteria(db, criteria)
 

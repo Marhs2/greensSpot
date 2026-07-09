@@ -44,17 +44,14 @@ app.include_router(auth_router)
 app.include_router(integration_router)
 
 
-@app.exception_handler(HTTPException)
-async def custom_http_exception_handler(request: Request, exc: HTTPException):
-    response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+def _apply_cors_headers(request: Request, response: JSONResponse) -> JSONResponse:
+    """CORSMiddleware 와 동일 정책 — 커스텀 예외 응답에도 ACAO 부여."""
     origin = request.headers.get("origin")
-    # CORSMiddleware 와 동일 정책: 허용 목록 또는 개발 환경 전 origin
     allow = False
     if origin:
         if origin in settings.cors_origins:
             allow = True
         elif settings.environment.lower() == "development":
-            # 개발: 로컬 호스트만 예외 헤더 부여 (evil.example.com 차단 테스트와 정합)
             if (
                 "localhost" in origin
                 or "127.0.0.1" in origin
@@ -66,6 +63,24 @@ async def custom_http_exception_handler(request: Request, exc: HTTPException):
         response.headers["Access-Control-Allow-Origin"] = origin
         response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    response = JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+    return _apply_cors_headers(request, response)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    """미처리 예외도 JSON + CORS 헤더로 반환 (브라우저 CORS 오인 방지)."""
+    import logging
+    logging.getLogger("uvicorn.error").exception("Unhandled error on %s", request.url.path)
+    response = JSONResponse(
+        status_code=500,
+        content={"detail": "Internal server error"},
+    )
+    return _apply_cors_headers(request, response)
 
 
 @app.get("/")
