@@ -120,6 +120,11 @@ export function AgentPanel({
               <div className="mt-2.5 border-t border-border pt-2 text-[11px] text-muted-foreground">
                 <span className="text-foreground/70">검색 조건</span> · {result.criteria.explanation}
               </div>
+              {result.criteria?.topRecommendation && (
+                <p className="mt-1.5 text-[11px] leading-snug text-muted-foreground">
+                  목록은 검색 용도 점수로 정렬됩니다. 카드 배지의 「1순위 추천」은 부지 종합 1위 용도라 검색 용도와 다를 수 있습니다.
+                </p>
+              )}
             </div>
 
             {result.results.length > 0 && (

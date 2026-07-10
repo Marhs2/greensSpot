@@ -65,6 +65,18 @@ export interface Parcel {
   parcelType: ParcelType;
   ownership: Ownership;
   soilType: SoilType;
+  soilTypeLabel?: string | null;
+  soilDetail?: {
+    surttureCd?: string | null;
+    surttureName?: string | null;
+    drainageName?: string | null;
+    validDepthName?: string | null;
+    surfaceStoneName?: string | null;
+    soilTypeLabel?: string | null;
+    pnu?: string | null;
+  } | null;
+  pnu?: string | null;
+  dataProvenance?: Record<string, { source?: string; dataType?: string; actual?: boolean }>;
   elevationM: number;
   slopeDegree: number;
   solarIrradiance: number;

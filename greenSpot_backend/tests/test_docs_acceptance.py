@@ -557,9 +557,9 @@ class TestDocKosis25Districts:
         for d in ("금천구", "용산구", "서초구", "강남구", "종로구"):
             assert d in DISTRICT_TO_OBJ_L1
 
-    def test_kosis_endpoint_rejects_non_seoul_region(self, client):
+    def test_kosis_public_endpoint_removed(self, client):
         r = client.get("/api/v1/gs/kosis/population?district=해운대구")
-        assert r.status_code == 400
+        assert r.status_code == 404
 
 
 # =============================================================================

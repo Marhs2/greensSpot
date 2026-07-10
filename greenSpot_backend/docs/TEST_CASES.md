@@ -90,7 +90,7 @@
 | --- | --- | --- | --- | --- |
 | EXP-01 | 점수 설명 생성 | 1. 부지 상세 진입<br>2. 설명/Explain 실행 | 마크다운형 설명 표시 (요약·추천·대안·한계 등). 로딩 후 오류 없음 |  |
 | EXP-02 | 설명 수치 정합성 | 1. 상세에 표시된 점수·면적 기록<br>2. 설명 본문의 숫자와 대조 | 설명에 **화면에 없는 점수/면적**이 새로 만들어지지 않음 |  |
-| EXP-03 | 출처 표기 정직성 | 1. 설명 본문의 데이터 출처 문구 확인 | 실제 미사용 출처(예: Landsat)를 실측 근거처럼만 단정하지 않음. 모순 시 실패 |  |
+| EXP-03 | 출처 표기 정직성 | 1. 설명 본문의 데이터 출처 문구 확인 | Visual Crossing 등 실연동 출처와 모순 없이 표기. 미사용 출처 단정 시 실패 |  |
 
 ---
 
@@ -159,7 +159,7 @@
 | HAL-01 | 시드 부지 provenance<br>DB 부지 상세 | 1. 시드/DB 부지 상세 열기<br>2. dataProvenance 확인 (UI 또는 API) | 시드 데이터인데 전 필드 `actual=true`(VWorld 실측)처럼 보이면 **실패** |  |
 | HAL-02 | 상세 vs 목록 필드 | 1. 동일 부지 목록 카드와 상세 비교<br>2. 규제·수목가능성 유무 비교 | 목록에만 있고 상세에 없으면 **실패** (또는 의도된 차이면 문서화 필요) |  |
 | HAL-03 | 점수 범위 0~100 | 1. 목록·상세에서 점수 여러 건 확인 | 100 초과·음수 점수 없음 |  |
-| HAL-04 | Explain 출처 | 1. EXP-01 설명 본문 출처 확인 | 미사용 출처(Landsat 등)를 실측 근거로 단정하면 **실패** |  |
+| HAL-04 | Explain 출처 | 1. EXP-01 설명 본문 출처 확인 | 미사용 출처를 실측 근거로 단정하면 **실패** (VC 등 실연동과 일치) |  |
 | HAL-05 | 라이브 사회지표 | 1. 라이브 부지 상세의 학교·병원·지하철 등 | 미연동이면 0 위장 없이 빈값/— 표시 |  |
 | HAL-06 | Agent 요약 환각 | 1. AGT-01 결과 이름·점수 기록<br>2. 요약 문장과 대조 | 결과에 없는 부지명·점수 수치 생성 시 **실패** |  |
 
@@ -172,10 +172,10 @@
 | TC ID | 내용/조건 | 절차 | 결과 | 체크 |
 | --- | --- | --- | --- | --- |
 | INT-01 | 헬스 체크 | 1. `GET /api/gs/health` | `status=healthy`, DB connected, 키 configured 플래그 표시 |  |
-| INT-02 | KOSIS 가구 — 금천구 | 1. `GET /api/v1/gs/kosis/households?district=금천구` | 200. `dataAvailable` 와 households 정합 (false면 null 허용) |  |
+| INT-02 | KOSIS 공개 API 미제공 | 1. `GET /api/v1/gs/kosis/households?district=금천구` | **404** (공개 엔드포인트 제거, 내부 enrich 전용) |  |
 | INT-03 | KOSIS 미지원 지역 | 1. `district=해운대구` | 400. 서울 25구 안내 |  |
 | INT-04 | Visual Crossing climate | 1. lat/lng 로 climate 호출 | 200. dataAvailable true면 irradiance 유의미. false면 가짜 실측 단정 없음 |  |
-| INT-05 | GEE 미제공 | 1. `GET /api/v1/gs/gee/lst` | 404 (미제공) |  |
+| INT-05 | Visual Crossing heat | 1. `GET /api/v1/gs/visualcrossing/heat?lat=37.5&lng=127.0` | 200. 열섬 추정 (Visual Crossing) |  |
 | INT-06 | 관리자 API 없음 | 1. `POST /api/v1/gs/admin/scores/recompute` | 404 |  |
 
 ---

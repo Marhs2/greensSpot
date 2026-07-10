@@ -24,18 +24,11 @@ from app.services.vworld_service import (
     VWorldBBoxError,
 )
 from app.services.kma_service import client as kma_client, KmaNotConfigured
-from app.services.kosis_service import (
-    client as kosis_client,
-    KosisNotConfigured,
-    DISTRICT_TO_OBJ_L1,
-)
 from app.services.visual_crossing_service import (
     client as visual_crossing_client,
     VisualCrossingNotConfigured,
 )
 from app.schemas.schemas import (
-    KosisPopulationResponse,
-    KosisHouseholdResponse,
     VisualCrossingClimateResponse,
     VisualCrossingHeatResponse,
     VisualCrossingTimelineResponse,
@@ -224,49 +217,6 @@ async def enrich_environment(parcel_id: str, db: AsyncSession = Depends(get_db))
         "climate": climate,
         "source": "KMA",
     }
-
-
-# ---------------------------------------------------------------------------
-# KOSIS 인구·가구 통계 조회 (F-25)
-# ---------------------------------------------------------------------------
-@router.get("/kosis/population", response_model=KosisPopulationResponse)
-async def kosis_population(
-    district: str = Query(..., description="서울 자치구 (중구, 성동구, 동대문구, 마포구, 강남구)"),
-    year: Optional[int] = Query(None, description="조회 연도 (미지정 시 작년)"),
-):
-    if district not in DISTRICT_TO_OBJ_L1:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"지원하지 않는 자치구입니다: {district!r} "
-                f"(지원: {sorted(DISTRICT_TO_OBJ_L1.keys())})"
-            ),
-        )
-    try:
-        payload = await kosis_client().get_population(district, year)
-    except KosisNotConfigured as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    return KosisPopulationResponse(**payload)
-
-
-@router.get("/kosis/households", response_model=KosisHouseholdResponse)
-async def kosis_households(
-    district: str = Query(..., description="서울 자치구 (중구, 성동구, 동대문구, 마포구, 강남구)"),
-    year: Optional[int] = Query(None, description="조회 연도 (미지정 시 작년)"),
-):
-    if district not in DISTRICT_TO_OBJ_L1:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                f"지원하지 않는 자치구입니다: {district!r} "
-                f"(지원: {sorted(DISTRICT_TO_OBJ_L1.keys())})"
-            ),
-        )
-    try:
-        payload = await kosis_client().get_household(district, year)
-    except KosisNotConfigured as e:
-        raise HTTPException(status_code=400, detail=str(e))
-    return KosisHouseholdResponse(**payload)
 
 
 # ---------------------------------------------------------------------------

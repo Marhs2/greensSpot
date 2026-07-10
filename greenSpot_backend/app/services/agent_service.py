@@ -91,7 +91,14 @@ def _criteria_explanation(criteria: Dict[str, Any]) -> str:
     if criteria.get("parcelType"):
         parts.append(f"유형={criteria['parcelType']}")
     if criteria.get("topRecommendation"):
-        parts.append(f"추천={criteria['topRecommendation']}")
+        rec = str(criteria["topRecommendation"]).upper()
+        rec_label = {
+            "TREE": "수목 식재",
+            "SUMOK": "수목 식재",
+            "GARDEN": "텃밭",
+            "SOLAR": "태양광",
+        }.get(rec, rec)
+        parts.append(f"추천용도={rec_label}")
     if criteria.get("minScore"):
         parts.append(f"최소점수={criteria['minScore']}")
     if criteria.get("limit"):
@@ -177,16 +184,23 @@ def _build_summary(query: str, criteria: Dict[str, Any], results: List[Dict[str,
         if district:
             return f"{district}에서 조건에 맞는 부지를 찾지 못했습니다. 면적 조건을 넓히거나 용도 키워드를 빼 보세요."
         return "지역명을 포함해 검색해 주세요. 예: 용산구, 해운대구, 성남시"
-    lead = results[0].get("name", "")
+    lead = (results[0].get("name") or "").strip() or "해당 부지"
     region = district or results[0].get("district", "해당 지역")
     src = "VWorld 실시간" if settings.vworld_api_key else "DB"
     pref = criteria.get("topRecommendation")
     pref_note = ""
     if pref:
-        label = {"TREE": "수목", "GARDEN": "텃밭", "SOLAR": "태양광"}.get(pref, pref)
+        label = {"TREE": "수목", "SUMOK": "수목", "GARDEN": "텃밭", "SOLAR": "태양광"}.get(
+            str(pref).upper(), str(pref)
+        )
         sc = _score_for_use_parcel(results[0], pref)
         pref_note = f" ({label} 점수 {sc:.0f} 기준 정렬)"
-    return f"{lead} 부지가 추천됩니다. {region} · {src} 조회 {len(results)}건{pref_note}"
+    # 이름이 이미 「부지」로 끝나면 「부지가」 중복 방지
+    if lead.endswith("부지"):
+        lead_phrase = f"{lead}가 추천됩니다"
+    else:
+        lead_phrase = f"{lead} 부지가 추천됩니다"
+    return f"{lead_phrase}. {region} · {src} 조회 {len(results)}건{pref_note}"
 
 
 async def ai_search(db: AsyncSession, query: str) -> Dict[str, Any]:

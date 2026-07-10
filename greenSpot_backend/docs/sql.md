@@ -83,9 +83,6 @@ CREATE TABLE IF NOT EXISTS `Parcel` (
   -- Parcel 테이블의 기존 camelCase 컬럼 명명 관례에 따라 `kosisPopulationSnapshot`을 사용한다.
   `kosisPopulationSnapshot` JSON NULL COMMENT 'KOSIS 인구·가구 통계 스냅샷 {district, year, population, households, source, dataAvailable, createdAt}',
 
-  -- GEE LST/열섬 분석 스냅샷 (선택 사양). 원천은 GeeLstSnapshot.
-  `geeLstSnapshot` JSON NULL COMMENT 'GEE LST/열섬 분석 스냅샷 {dataset, radiusM, period, meanLstC, heatIslandIntensityC, sampleCount, dataAvailable, createdAt}',
-
   `estimatedAcquisitionCostWon` BIGINT NOT NULL DEFAULT 0,
   `dataSource` VARCHAR(100) NOT NULL DEFAULT 'sample',
   `confidence` DOUBLE NOT NULL DEFAULT 0.9,
@@ -258,32 +255,6 @@ CREATE TABLE IF NOT EXISTS `ParcelRegulation` (
   KEY `idx_parcel_regulation_severity` (`severity`),
   KEY `idx_parcel_regulation_typename` (`typename`),
   CONSTRAINT `fk_parcelregulation_parcel` FOREIGN KEY (`parcelId`) REFERENCES `Parcel` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ==================== GeeLstSnapshot (선택 사양) ====================
--- Google Earth Engine LST / 열섬 분석 결과를 부지 단위로 저장하는 선택적 스냅샷 테이블.
-
-CREATE TABLE IF NOT EXISTS `GeeLstSnapshot` (
-  `id` VARCHAR(30) NOT NULL,
-  `parcelId` VARCHAR(30) NOT NULL,
-  `dataset` VARCHAR(20) NOT NULL COMMENT 'modis 또는 landsat',
-  `radiusM` INT NOT NULL COMMENT '분석 반경(m)',
-  `innerRadiusM` INT NULL COMMENT '열섬 분석 내부 반경(m). LST 조회 시 NULL',
-  `periodStart` DATE NOT NULL COMMENT '분석 시작일',
-  `periodEnd` DATE NOT NULL COMMENT '분석 종료일',
-  `meanLstC` DOUBLE NULL COMMENT '평균 지표면 온도(℃)',
-  `maxLstC` DOUBLE NULL,
-  `minLstC` DOUBLE NULL,
-  `heatIslandIntensityC` DOUBLE NULL COMMENT '열섬 강도(℃)',
-  `sampleCount` INT NOT NULL DEFAULT 0,
-  `source` VARCHAR(50) NOT NULL DEFAULT 'gee',
-  `dataAvailable` BOOLEAN NOT NULL DEFAULT FALSE COMMENT 'GEE 데이터 확보 여부',
-  `rawData` JSON NULL COMMENT 'GEE 분석 원본/메타데이터',
-  `createdAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_geelstsnapshot_parcelId` (`parcelId`),
-  KEY `idx_geelstsnapshot_period` (`periodStart`, `periodEnd`),
-  CONSTRAINT `fk_geelstsnapshot_parcel` FOREIGN KEY (`parcelId`) REFERENCES `Parcel` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ==================== KosisStatSnapshot (선택 사양) ====================

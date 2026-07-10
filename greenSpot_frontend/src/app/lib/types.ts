@@ -42,6 +42,20 @@ export interface Parcel {
   landCategory?: LandCategory | string | null;
   ownership: Ownership;
   soilType: SoilType;
+  /** 흙토람 표토토성 한글명 (실조회 시) */
+  soilTypeLabel?: string | null;
+  /** 흙토람 상세 특성 */
+  soilDetail?: {
+    surttureCd?: string | null;
+    surttureName?: string | null;
+    drainageName?: string | null;
+    validDepthName?: string | null;
+    surfaceStoneName?: string | null;
+    soilTypeLabel?: string | null;
+    pnu?: string | null;
+  } | null;
+  pnu?: string | null;
+  dataProvenance?: Record<string, { source?: string; dataType?: string; actual?: boolean }>;
   solarIrradiance: number; // kWh/㎡/day
   monthlyIrradiance: number[]; // 12
   sunlightHours: number;

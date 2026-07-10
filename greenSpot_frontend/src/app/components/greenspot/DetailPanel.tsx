@@ -164,7 +164,20 @@ function OverviewTab({ p }: { p: Parcel }) {
           <Stat icon={Ruler} label="면적" value={Number(p.areaSqm || 0).toLocaleString()} unit="㎡" />
           <Stat icon={SunIcon} label="일사량" value={p.solarIrradiance ?? "—"} unit="kWh/㎡·일" />
           <Stat icon={SunIcon} label="일조시간" value={p.sunlightHours ?? "—"} unit="h" />
-          <Stat icon={Thermometer} label="열섬강도" value={p.heatIsland != null ? `+${p.heatIsland}` : "—"} unit="℃" />
+          <Stat
+            icon={Thermometer}
+            label="열섬강도"
+            value={
+              p.heatIsland == null
+                ? "—"
+                : p.heatIsland === 0
+                  ? "0"
+                  : p.heatIsland > 0
+                    ? `+${p.heatIsland}`
+                    : String(p.heatIsland)
+            }
+            unit="℃"
+          />
           <Stat icon={Thermometer} label="여름 지표온도" value={p.surfaceTempSummer ?? "—"} unit="℃" />
           <Stat icon={Wind} label="PM2.5" value={p.airQuality ?? "—"} unit="μg/m³" />
         </div>
@@ -175,11 +188,54 @@ function OverviewTab({ p }: { p: Parcel }) {
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           <Stat icon={Layers} label="유형" value={PARCEL_TYPE_LABEL[p.parcelType] ?? p.parcelType} />
           <Stat icon={Landmark} label="소유권" value={OWNERSHIP_LABEL[p.ownership] ?? p.ownership} />
-          <Stat icon={Layers} label="토양" value={SOIL_LABEL[p.soilType] ?? p.soilType} />
+          <Stat
+            icon={Layers}
+            label="토양"
+            value={
+              p.soilTypeLabel
+              || p.soilDetail?.surttureName
+              || SOIL_LABEL[p.soilType]
+              || p.soilType
+            }
+          />
           <Stat icon={Droplets} label="수자원 접근" value={p.waterAccess ? "가능" : "불가/추정"} />
           <Stat icon={Zap} label="전력 접근" value={p.electricityAccess ? "가능" : "불가/추정"} />
           <Stat icon={Ruler} label="경사도" value={p.slopeDegree != null && p.slopeDegree > 0 ? p.slopeDegree : "—"} unit="°" />
         </div>
+        {(() => {
+          const soilProv = p.dataProvenance?.soilType;
+          const actual = soilProv?.actual === true;
+          const detail = p.soilDetail;
+          return (
+            <div className="mt-2 rounded-md border border-border bg-card px-3 py-2.5 text-[11px]">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-muted-foreground">토양 유형</span>
+                <span className="font-medium text-foreground">
+                  {p.soilTypeLabel || detail?.surttureName || SOIL_LABEL[p.soilType] || p.soilType}
+                </span>
+                <span
+                  className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                    actual ? "bg-tree-soft text-tree" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {actual ? "ACTUAL" : "ESTIMATED"}
+                </span>
+              </div>
+              <div className="mt-1 text-muted-foreground">
+                {soilProv?.source || "흙토람 (농진청)"}
+                {soilProv?.dataType ? ` · ${soilProv.dataType}` : actual ? " · PNU 표토토성" : " · 미조회/미제공"}
+                {p.pnu ? ` · PNU ${p.pnu}` : ""}
+              </div>
+              {detail && (detail.drainageName || detail.validDepthName || detail.surfaceStoneName) && (
+                <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-muted-foreground">
+                  {detail.drainageName && <span>배수 {detail.drainageName}</span>}
+                  {detail.validDepthName && <span>유효토심 {detail.validDepthName}</span>}
+                  {detail.surfaceStoneName && <span>자갈 {detail.surfaceStoneName}</span>}
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       <div className="flex items-start gap-2 rounded-md border border-border bg-muted/40 px-3 py-2.5 text-[11px] text-muted-foreground">
@@ -348,7 +404,7 @@ function AiTab({ p }: { p: Parcel }) {
     <div className="space-y-3">
       <div className="flex items-start gap-2 rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-[11px] text-muted-foreground">
         <Sparkles className="mt-0.5 size-3.5 shrink-0 text-primary" />
-        AI는 검증된 facts 수치와 규제 데이터만 인용합니다. 4섹션(종합판단/강점약점/근거데이터/리스크) 구조 강제.
+        AI는 검증된 facts 수치와 규제 데이터만 인용합니다. 4섹션(📍 부지 요약 / 🎯 추천 결과 / 💡 대안 용도 / ⚠️ 한계) 구조.
       </div>
       {!text && !loading && (
         <Button onClick={generate} className="w-full">
@@ -425,46 +481,56 @@ function SimulationTab({ p }: { p: Parcel }) {
     setAll(null);
   }, [p.id]);
 
+  // 비교 차트용 COMPARE_ALL — 필지당 1회
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const simOpts = { areaSqm: p.areaSqm, parcelName: p.name };
+        const compareAll = await apiSimulate(
+          p.id,
+          "COMPARE_ALL",
+          defaultQuantity(p, pickDefaultUse(p)),
+          simOpts,
+        );
+        if (cancelled || !compareAll?.scenarios) return;
+        const scenarios = compareAll.scenarios;
+        setAll({
+          SUMOK: mapApiEffects(scenarios.PLANT_TREES?.effects ?? {}, defaultQuantity(p, "SUMOK")),
+          GARDEN: mapApiEffects(scenarios.CREATE_GARDEN?.effects ?? {}, defaultQuantity(p, "GARDEN")),
+          SOLAR: mapApiEffects(scenarios.INSTALL_SOLAR?.effects ?? {}, defaultQuantity(p, "SOLAR")),
+        });
+      } catch {
+        if (!cancelled) setAll(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [p.id]);
+
+  // 현재 용도·수량 시나리오 — 용도/수량 변경 시에만
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setSimLoading(true);
       try {
         const simOpts = { areaSqm: p.areaSqm, parcelName: p.name };
-        const [singleRes, compareRes] = await Promise.allSettled([
-          apiSimulate(p.id, USE_TO_SCENARIO[use], qty, simOpts),
-          apiSimulate(p.id, "COMPARE_ALL", defaultQuantity(p, use), simOpts),
-        ]);
+        const single = await apiSimulate(p.id, USE_TO_SCENARIO[use], qty, simOpts);
         if (cancelled) return;
-
-        const single = singleRes.status === "fulfilled" ? singleRes.value : null;
-        const compareAll = compareRes.status === "fulfilled" ? compareRes.value : null;
-        if (!single && !compareAll) throw new Error("simulate failed");
-
-        const scenarios = {
-          ...(compareAll?.scenarios ?? {}),
-          ...(single?.scenarios ?? {}),
-        };
+        if (!single) throw new Error("simulate failed");
         const key = USE_TO_SCENARIO[use];
-        const effects = scenarios[key]?.effects ?? {};
-        setEff(mapApiEffects(effects, qty));
-        const mapped: Record<ScoreUse, ScenarioEffects> = {
-          SUMOK: mapApiEffects(scenarios.PLANT_TREES?.effects ?? {}, defaultQuantity(p, "SUMOK")),
-          GARDEN: mapApiEffects(scenarios.CREATE_GARDEN?.effects ?? {}, defaultQuantity(p, "GARDEN")),
-          SOLAR: mapApiEffects(scenarios.INSTALL_SOLAR?.effects ?? {}, defaultQuantity(p, "SOLAR")),
-        };
-        setAll(mapped);
+        const effects = single.scenarios?.[key]?.effects ?? single.effects ?? {};
+        setEff(mapApiEffects(effects as Record<string, unknown>, qty));
       } catch {
-        if (!cancelled) {
-          setEff(null);
-          setAll(null);
-        }
-
+        if (!cancelled) setEff(null);
       } finally {
         if (!cancelled) setSimLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [p.id, use, qty]);
 
   const unit = use === "SUMOK" ? "그루" : use === "GARDEN" ? "㎡" : "패널";
@@ -485,7 +551,7 @@ function SimulationTab({ p }: { p: Parcel }) {
     );
   }
 
-  if (!eff || !all) {
+  if (!eff) {
     return (
       <div className="py-16 text-center text-sm text-muted-foreground">
         시뮬레이션 데이터를 불러오지 못했습니다.

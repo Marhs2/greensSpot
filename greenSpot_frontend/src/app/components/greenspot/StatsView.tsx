@@ -119,7 +119,7 @@ export function StatsView({ history }: { history: HistoryEntry[] }) {
   const subtitle =
     parcels.length === 0
       ? "검색으로 지역을 선택하면 해당 지역 통계가 표시됩니다."
-      : `${stats.regionLabel} · ${stats.total}개 부지 · 수목 식재(SUMOK) 기준`;
+      : `${stats.regionLabel} · ${stats.total}개 부지 · 현재 목록 기준`;
 
   return (
     <div className="mx-auto max-w-[1600px] space-y-4 px-4 py-5 sm:px-6">
@@ -159,10 +159,13 @@ export function StatsView({ history }: { history: HistoryEntry[] }) {
                 <XAxis dataKey="name" tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} tickLine={false} axisLine={false} />
                 <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
-                <Legend wrapperStyle={{ fontSize: 11 }} />
-                <Bar key="bar-sumok"  dataKey="수목"   fill="var(--tree)"   radius={[2, 2, 0, 0]} />
-                <Bar key="bar-garden" dataKey="텃밭"   fill="var(--garden)" radius={[2, 2, 0, 0]} />
-                <Bar key="bar-solar"  dataKey="태양광" fill="var(--solar)"  radius={[2, 2, 0, 0]} />
+                <Legend
+                  wrapperStyle={{ fontSize: 11 }}
+                  formatter={(value) => <span style={{ marginRight: 8 }}>{value}</span>}
+                />
+                <Bar key="bar-sumok"  dataKey="수목"   name="수목"   fill="var(--tree)"   radius={[2, 2, 0, 0]} />
+                <Bar key="bar-garden" dataKey="텃밭"   name="텃밭"   fill="var(--garden)" radius={[2, 2, 0, 0]} />
+                <Bar key="bar-solar"  dataKey="태양광" name="태양광" fill="var(--solar)"  radius={[2, 2, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           )}

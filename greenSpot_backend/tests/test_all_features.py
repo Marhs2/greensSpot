@@ -211,6 +211,9 @@ class TestFeatureAgent:
                     "message": "지역을 입력해 주세요",
                 }
             ),
+        ), patch(
+            "app.services.agent_service.search_parcels_by_criteria",
+            new=AsyncMock(return_value=[]),
         ):
             st.vworld_api_key = "k"
             r = client.post("/api/gs/agent", json={"query": "수목 추천해줘"})
@@ -458,53 +461,20 @@ class TestFeatureStatsTrendingHistory:
         assert r.status_code == 200
         assert r.json()["totalParcels"] == 3
 
-    def test_trending(self, client):
-        with patch(
-            "app.api.v1.gs_router.get_trending",
-            new=AsyncMock(
-                return_value={
-                    "totalQueries": 1,
-                    "topKeywords": [{"keyword": "수목", "count": 1}],
-                    "topDistricts": [{"district": "금천구", "count": 1}],
-                    "recentQueries": ["금천구 수목"],
-                    "generatedAt": datetime.utcnow(),
-                }
-            ),
-        ):
-            r = client.get("/api/gs/trending")
-        assert r.status_code == 200
-        assert "topKeywords" in r.json()
+    def test_trending_removed(self, client):
+        r = client.get("/api/gs/trending")
+        assert r.status_code == 404
 
-    def test_history(self, client):
-        with patch(
-            "app.api.v1.gs_router.get_history",
-            new=AsyncMock(
-                return_value={
-                    "history": [
-                        {
-                            "id": "1",
-                            "query": "금천구",
-                            "criteria": {},
-                            "resultCount": 2,
-                            "summary": "ok",
-                            "source": "ai",
-                            "createdAt": datetime.utcnow(),
-                        }
-                    ],
-                    "total": 1,
-                }
-            ),
-        ):
-            r = client.get("/api/gs/history?limit=10")
-        assert r.status_code == 200
-        assert r.json()["total"] == 1
+    def test_history_removed(self, client):
+        r = client.get("/api/gs/history?limit=10")
+        assert r.status_code == 404
 
 
 # =============================================================================
-# 9. Auth full flow (F-09, F-10, F-19, F-20)
+# 9. Auth full flow (F-09, F-10, F-19) — F-20 제거
 # =============================================================================
 class TestFeatureAuth:
-    def test_signup_login_me_refresh_logout(self, db_client):
+    def test_signup_login_refresh_logout(self, db_client):
         email = "allfeat@example.com"
         password = "secret12"
 
@@ -522,10 +492,8 @@ class TestFeatureAuth:
         assert r.status_code == 200
         tokens = r.json()
         access, refresh = tokens["access_token"], tokens["refresh_token"]
-
-        r = db_client.get("/api/users/me", headers=_auth_headers(access))
-        assert r.status_code == 200
-        assert r.json()["email"] == email
+        assert tokens.get("user", {}).get("email") == email
+        assert access
 
         r = db_client.post(
             "/api/auth/refresh",
@@ -533,7 +501,6 @@ class TestFeatureAuth:
         )
         assert r.status_code == 200
         new_refresh = r.json()["refresh_token"]
-        new_access = r.json()["access_token"]
 
         r = db_client.post(
             "/api/auth/logout",
@@ -547,10 +514,6 @@ class TestFeatureAuth:
             json={"refresh_token": new_refresh},
         )
         assert r.status_code == 401
-
-        # access 는 아직 유효할 수 있음
-        r = db_client.get("/api/users/me", headers=_auth_headers(new_access))
-        assert r.status_code in (200, 401)
 
     def test_signup_duplicate(self, db_client):
         email = "dup@example.com"
@@ -570,19 +533,18 @@ class TestFeatureAuth:
         )
         assert r.status_code == 401
 
-    def test_me_unauthorized(self, db_client):
+    def test_me_removed(self, db_client):
         r = db_client.get("/api/users/me")
-        assert r.status_code in (401, 403)
+        assert r.status_code == 404
 
-    def test_preferences(self, db_client):
+    def test_preferences_removed(self, db_client):
         access, _ = _signup_login(db_client, "pref@example.com")
         r = db_client.patch(
             "/api/users/me/preferences",
             headers=_auth_headers(access),
             json={"theme": "dark"},
         )
-        assert r.status_code == 200
-        assert r.json()["theme"] == "dark"
+        assert r.status_code == 404
 
 
 # =============================================================================
@@ -740,53 +702,19 @@ class TestFeatureIntegrationVWorld:
 
 
 # =============================================================================
-# 12. KOSIS (F-25)
+# 12. KOSIS (F-25) — 공개 API 제거
 # =============================================================================
 class TestFeatureKosis:
-    def test_population_success(self, client):
-        mock_cli = MagicMock()
-        mock_cli.get_population = AsyncMock(
-            return_value={
-                "district": "강남구",
-                "year": 2024,
-                "population": 500000,
-                "source": "kosis",
-                "dataAvailable": True,
-            }
-        )
-        with patch(
-            "app.api.v1.integration_router.kosis_client",
-            return_value=mock_cli,
-        ):
-            r = client.get("/api/v1/gs/kosis/population?district=강남구")
-        assert r.status_code == 200
-        assert r.json()["population"] == 500000
-        assert r.json()["dataAvailable"] is True
+    def test_population_removed(self, client):
+        r = client.get("/api/v1/gs/kosis/population?district=강남구")
+        assert r.status_code == 404
 
-    def test_households_success(self, client):
-        mock_cli = MagicMock()
-        mock_cli.get_household = AsyncMock(
-            return_value={
-                "district": "금천구",
-                "year": 2024,
-                "households": 100000,
-                "source": "kosis",
-                "dataAvailable": True,
-            }
-        )
-        with patch(
-            "app.api.v1.integration_router.kosis_client",
-            return_value=mock_cli,
-        ):
-            r = client.get("/api/v1/gs/kosis/households?district=금천구")
-        assert r.status_code == 200
-        assert r.json()["households"] == 100000
+    def test_households_removed(self, client):
+        r = client.get("/api/v1/gs/kosis/households?district=금천구")
+        assert r.status_code == 404
 
-    def test_households_unknown_district(self, client):
-        r = client.get("/api/v1/gs/kosis/households?district=해운대구")
-        assert r.status_code == 400
-
-    def test_population_known_district_mapping(self):
+    def test_district_mapping_still_in_service(self):
+        # 내부 라이브 보강용 매핑은 서비스 모듈에 남을 수 있음
         from app.services.kosis_service import DISTRICT_TO_OBJ_L1
 
         assert len(DISTRICT_TO_OBJ_L1) == 25
@@ -947,22 +875,9 @@ class TestFeatureScoringProvenance:
 
 
 # =============================================================================
-# 16. Dual trending/history under /api/gs and /api (auth router aliases)
+# 16. F-16/F-17 제거 — trending/history 미제공
 # =============================================================================
 class TestFeatureDualPrefix:
-    def test_auth_router_trending(self, client):
-        with patch(
-            "app.api.v1.auth_router.get_trending",
-            new=AsyncMock(
-                return_value={
-                    "totalQueries": 0,
-                    "topKeywords": [],
-                    "topDistricts": [],
-                    "recentQueries": [],
-                    "generatedAt": datetime.utcnow(),
-                }
-            ),
-        ):
-            r = client.get("/api/gs/trending")
-        # /api/gs/trending is on gs_router primarily
-        assert r.status_code == 200
+    def test_trending_and_history_removed(self, client):
+        assert client.get("/api/gs/trending").status_code == 404
+        assert client.get("/api/gs/history").status_code == 404

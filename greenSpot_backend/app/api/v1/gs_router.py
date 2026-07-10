@@ -5,7 +5,7 @@ from app.db.database import get_db
 from app.core.config import settings
 from app.models.models import Parcel, ParcelScore
 from app.services.parcel_service import get_all_parcels, get_parcel_detail, compare_parcels, get_stats
-from app.services.stats_service import get_stats as get_stats_full, get_trending, get_history
+from app.services.stats_service import get_stats as get_stats_full
 from app.services.agent_service import ai_search
 from app.services.live_search_service import live_search, live_get_parcel, live_stats_from_results
 from app.services.vworld_discovery_service import VWorldDiscoveryError
@@ -17,7 +17,6 @@ from app.schemas.schemas import (
     HealthResponse, ParcelListResponse, ParcelDetailResponse, AgentSearchRequest,
     AgentSearchResponse, ExplainResponse, SimulateRequest, ScenarioResponse,
     CompareRequest, CompareResponse, ReportRequest, StatsResponse,
-    TrendingResponse, HistoryResponse,
 )
 from datetime import datetime
 import time
@@ -246,14 +245,4 @@ async def get_stats_endpoint(db: AsyncSession = Depends(get_db)):
     return StatsResponse(**stats)
 
 
-@router.get("/trending", response_model=TrendingResponse)
-async def get_trending_endpoint(db: AsyncSession = Depends(get_db)):
-    return TrendingResponse(**(await get_trending(db)))
 
-
-@router.get("/history", response_model=HistoryResponse)
-async def get_history_endpoint(
-    limit: int = Query(20, ge=1, le=100),
-    db: AsyncSession = Depends(get_db),
-):
-    return HistoryResponse(**(await get_history(db, limit=limit)))

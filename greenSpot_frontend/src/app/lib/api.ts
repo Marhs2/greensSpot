@@ -8,7 +8,6 @@ import type {
   AuthUser,
   CompareResponse,
   ExplainResponse,
-  HistoryResponse,
   Parcel,
   ParcelsResponse,
   ParcelDetailResponse,
@@ -16,7 +15,6 @@ import type {
   ScenarioType,
   ShareResponse,
   StatsResponse,
-  TrendingResponse,
   UserBookmark,
   UseKey,
 } from "./types";
@@ -189,7 +187,11 @@ export async function getParcel(id: string): Promise<ParcelDetailResponse> {
 }
 
 // ── Agent search ────────────────────────────────────────────────────────
-const USE_LABEL_LOCAL: Record<UseKey, string> = { TREE: "식수", GARDEN: "텃밭", SOLAR: "태양광" };
+const USE_LABEL_LOCAL: Record<UseKey, string> = {
+  TREE: "수목 식재",
+  GARDEN: "텃밭",
+  SOLAR: "태양광",
+};
 const PARCEL_TYPE_LABEL_LOCAL: Record<string, string> = {
   VACANT_LOT: "빈터",
   ROOFTOP: "옥상",
@@ -301,14 +303,6 @@ export async function getStats(): Promise<StatsResponse> {
   return apiFetch<StatsResponse>(`/api/gs/stats`);
 }
 
-export async function getTrending(): Promise<TrendingResponse> {
-  return apiFetch<TrendingResponse>(`/api/gs/trending`);
-}
-
-export async function getHistory(limit = 20): Promise<HistoryResponse> {
-  return apiFetch<HistoryResponse>(`/api/gs/history?limit=${limit}`);
-}
-
 // ── Report / export ─────────────────────────────────────────────────────
 export async function exportReport(parcelId: string, format: "markdown" | "json"): Promise<Blob> {
   const res = await fetch(apiUrl("/api/gs/report"), {
@@ -360,18 +354,21 @@ export async function login(email: string, password: string): Promise<AuthUser> 
   if (!res.ok) {
     throw new ApiError(res.status, "이메일 또는 비밀번호가 올바르지 않습니다.");
   }
-  const data = (await res.json()) as { access_token: string; refresh_token: string };
+  const data = (await res.json()) as {
+    access_token: string;
+    refresh_token: string;
+    user?: { id: string; email: string; created_at: string };
+  };
   setTokens(data.access_token, data.refresh_token);
 
-  const me = await apiFetch<{ id: string; email: string; created_at: string }>(`/api/users/me`);
   const names = loadNames();
   const displayName = names[email.toLowerCase()] ?? email.split("@")[0];
   const user: AuthUser = {
-    id: me.id,
-    email: me.email,
+    id: data.user?.id ?? email,
+    email: data.user?.email ?? email,
     name: displayName,
     role: "user",
-    createdAt: me.created_at,
+    createdAt: data.user?.created_at ?? new Date().toISOString(),
   };
   saveSession(user);
   return user;
@@ -394,23 +391,11 @@ export async function logout(): Promise<void> {
   clearSession();
 }
 
+/** 세션 복원 — GET /users/me 제거 후 로컬 세션 + access token 존재로 판단 */
 export async function getMe(): Promise<AuthUser | null> {
   const token = getAccessToken();
   if (!token) return null;
-  try {
-    const me = await apiFetch<{ id: string; email: string; created_at: string }>(`/api/users/me`);
-    const names = loadNames();
-    const cached = loadSession();
-    return {
-      id: me.id,
-      email: me.email,
-      name: cached?.name ?? names[me.email.toLowerCase()] ?? me.email.split("@")[0],
-      role: cached?.role ?? "user",
-      createdAt: me.created_at,
-    };
-  } catch {
-    return null;
-  }
+  return loadSession();
 }
 
 // ── Bookmarks ───────────────────────────────────────────────────────────
@@ -450,13 +435,6 @@ export async function createShare(parcelId: string): Promise<ShareResponse> {
   return apiFetch<ShareResponse>(`/api/share`, {
     method: "POST",
     body: JSON.stringify({ parcelId }),
-  });
-}
-
-export async function updatePreferences(theme: "light" | "dark" | "system"): Promise<void> {
-  await apiFetch<{ theme: string }>(`/api/users/me/preferences`, {
-    method: "PATCH",
-    body: JSON.stringify({ theme }),
   });
 }
 

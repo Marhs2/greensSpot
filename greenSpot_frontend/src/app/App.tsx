@@ -9,7 +9,7 @@ import { ParcelList } from "./components/greenspot/ParcelList";
 import { DetailPanel } from "./components/greenspot/DetailPanel";
 import { CompareDialog } from "./components/greenspot/CompareDialog";
 import { BookmarkSheet } from "./components/greenspot/BookmarkSheet";
-import { StatsView, type HistoryEntry } from "./components/greenspot/StatsView";
+import { StatsView } from "./components/greenspot/StatsView";
 import { LoginPage, RegisterPage } from "./components/greenspot/AuthPages";
 import {
   getMe,
@@ -19,8 +19,6 @@ import {
   removeBookmark,
   loadSession,
   saveSession,
-  getHistory,
-  updatePreferences,
 } from "./lib/api";
 import { setLiveParcels, useParcels, useParcelsLoading, ensureParcel, findParcel } from "./lib/parcelStore";
 import { getParcel, topScore, type Parcel } from "./data/greenspot";
@@ -58,7 +56,6 @@ export default function App() {
   const [compareOpen, setCompareOpen] = useState(false);
   const [bookmarksOpen, setBookmarksOpen] = useState(false);
   const [exportItems, setExportItems] = useState<Parcel[]>([]);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
 
   const parcels = useParcels();
   const parcelsLoading = useParcelsLoading();
@@ -119,24 +116,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const data = await getHistory(30);
-        setHistory(
-          data.history.map((h) => ({
-            query: h.query,
-            source: h.source,
-            resultCount: h.resultCount,
-            at: h.createdAt,
-          })),
-        );
-      } catch {
-        setHistory([]);
-      }
-    })();
-  }, []);
-
-  useEffect(() => {
     if (!selectedId) return;
     const url = new URL(location.href);
     url.searchParams.set("parcel", selectedId);
@@ -156,12 +135,6 @@ export default function App() {
         localStorage.setItem("gs.theme", next ? "dark" : "light");
       } catch {
         /* ignore */
-      }
-      // F-15: 회원은 서버 환경설정에도 저장
-      if (user) {
-        void updatePreferences(next ? "dark" : "light").catch(() => {
-          /* 로컬 저장은 이미 반영 */
-        });
       }
       return next;
     });
@@ -325,7 +298,7 @@ export default function App() {
 
       <main className="min-h-0 flex-1 overflow-y-auto">
         {view === "stats" ? (
-          <StatsView history={history} />
+          <StatsView history={[]} />
         ) : (
           <div className="mx-auto max-w-[1600px] space-y-4 px-4 py-4 sm:px-6">
             <StatsBar />

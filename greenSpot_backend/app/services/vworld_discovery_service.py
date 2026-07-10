@@ -278,8 +278,10 @@ def build_data_provenance(
             "actual": ownership_actual,
         },
         "soilType": {
-            "source": "농촌진흥청 토양정보" if soil_type_actual else "GreenSpot",
-            "dataType": "토성(실제)" if soil_type_actual else "추정",
+            "source": "흙토람 (농진청)" if soil_type_actual else (
+                "흙토람 (농진청)" if settings.soil_api_key else "흙토람 (농진청, 미연동)"
+            ),
+            "dataType": "PNU 표토토성(Surtture_Cd)" if soil_type_actual else "PNU 조회 실패·미제공",
             "actual": soil_type_actual,
         },
         "solarIrradiance": {
@@ -955,13 +957,19 @@ async def build_parcel_from_feature(
             ownership = owner_r["ownership"]
             ownership_actual = True
 
-    # 토양
+    # 토양 (흙토람 getSoilCharacter — PNU 실조회)
     soil_type = "UNKNOWN"
     soil_type_actual = False
+    soil_detail: Optional[Dict[str, Any]] = None
+    soil_type_label: Optional[str] = None
     if not isinstance(soil_r, Exception) and isinstance(soil_r, dict):
         if soil_r.get("dataAvailable") and soil_r.get("soilType"):
             soil_type = normalize_soil_type_for_api(str(soil_r["soilType"]))
-            soil_type_actual = True
+            soil_type_actual = soil_type != "UNKNOWN"
+            soil_detail = soil_r.get("soilDetail")
+            soil_type_label = soil_r.get("soilTypeLabel") or (
+                (soil_detail or {}).get("surttureName") if isinstance(soil_detail, dict) else None
+            )
 
     env = base_environment(district, area_sqm, lat)
     env["_soil_type_for_score"] = soil_type
@@ -1038,6 +1046,8 @@ async def build_parcel_from_feature(
         "land_category": land_category,
         "ownership": ownership,
         "soil_type": soil_type,
+        "soil_type_label": soil_type_label,
+        "soil_detail": soil_detail,
         **env,
         "regulatory_restriction": primary_regulation_code(reg_seed),
         "regulations": reg_seed,

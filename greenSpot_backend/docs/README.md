@@ -27,7 +27,7 @@
 | Prefix | 라우터 | 용도 |
 | --- | --- | --- |
 | `/api/gs` | `gs_router` | 부지, 에이전트, 시뮬레이션, 통계, 리포트 |
-| `/api` | `auth_router` | 인증, 북마크, 공유, 환경설정 (`/auth/*`, `/bookmarks`, `/share`, `/users/me`) |
+| `/api` | `auth_router` | 인증, 북마크, 공유 (`/auth/*`, `/bookmarks`, `/share`) |
 | `/api/v1/gs` | `integration_router` | KOSIS, VWorld 토지정보, Visual Crossing, 규제 동기화 |
 
 Swagger: `http://localhost:8000/docs`

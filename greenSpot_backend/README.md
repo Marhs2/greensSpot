@@ -88,8 +88,8 @@ python -m scripts.seed
 | Prefix | 용도 |
 | --- | --- |
 | `/api/gs` | 부지, 에이전트, 시뮬, 통계, 리포트 |
-| `/api` | 인증, 북마크, 공유, 환경설정 |
-| `/api/v1/gs` | KOSIS, VWorld 토지, Visual Crossing, 규제 |
+| `/api` | 인증, 북마크, 공유 |
+| `/api/v1/gs` | VWorld 토지, Visual Crossing, 규제 (KOSIS는 내부 enrich 전용) |
 
 ## 엔드포인트 요약
 
@@ -104,20 +104,18 @@ python -m scripts.seed
 - `POST /api/gs/report`
 - `GET /api/gs/export`
 - `GET /api/gs/stats` — **DB 시드** 집계 (프론트 다지역은 클라이언트 집계)
-- `GET /api/gs/trending` · `GET /api/gs/history`
+
+> **미제공:** `GET /api/gs/trending` · `GET /api/gs/history` · `GET /api/users/me` · `PATCH /api/users/me/preferences` · `GET /api/v1/gs/kosis/*`
 
 ### Auth / Bookmarks
-- `POST /api/auth/signup|login|refresh|logout`
-- `GET /api/users/me`
+- `POST /api/auth/signup|login|refresh|logout` — login 응답에 `user` 포함
 - `GET|POST|DELETE /api/bookmarks` — **라이브 `VW-*` 스냅샷 가능** (Parcel FK 없음)
 - `POST /api/share` — `VW-*` 허용
-- `PATCH /api/users/me/preferences`
 
 ### 외부 연동 `/api/v1/gs`
 - `GET /api/v1/gs/vworld/layers`
-- `GET|POST /api/v1/gs/parcels/{id}/regulations[ /sync]`
-- `POST /api/v1/gs/parcels/{id}/enrich`
-- `GET /api/v1/gs/kosis/population|households` — 서울 **25구**
+- `GET|POST /api/v1/gs/parcels/{id}/regulations[ /sync]` — DB 시드
+- `POST /api/v1/gs/parcels/{id}/enrich` — legacy KMA
 - `GET /api/v1/gs/vworld/possession/{pnu}` — WMS PNG
 - `GET /api/v1/gs/vworld/characteristics/{pnu}`
 - `GET /api/v1/gs/visualcrossing/climate|heat|timeline`

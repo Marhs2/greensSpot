@@ -3,12 +3,88 @@ from sqlalchemy import select, func, and_, or_, text
 from sqlalchemy.orm import selectinload
 from typing import List, Dict, Any, Optional
 from datetime import datetime
+import logging
 from app.models.models import Parcel, ParcelScore
 from app.db.database import Base
-from app.services.vworld_discovery_service import build_data_provenance
+from app.services.vworld_discovery_service import build_data_provenance, normalize_soil_type_for_api
+from app.services.ttl_cache import cache_get, cache_set
 import json
 
+logger = logging.getLogger(__name__)
+
 DEFAULT_DB_DATA_SOURCE = "VWorld/LP_PA_CBND_BUBUN"
+
+
+async def _enrich_soil_from_location(
+    lat: float,
+    lng: float,
+    *,
+    existing_soil: str = "UNKNOWN",
+) -> Dict[str, Any]:
+    """좌표 → VWorld PNU → 흙토람 토양 실조회.
+
+    Returns:
+        {
+          soilType, soilTypeLabel, soilDetail, pnu,
+          soil_type_actual, source
+        }
+    """
+    from app.core.config import settings
+    from app.services.soil_service import client as soil_client
+    from app.services.vworld_service import VWorldClient
+
+    result: Dict[str, Any] = {
+        "soilType": normalize_soil_type_for_api(existing_soil),
+        "soilTypeLabel": None,
+        "soilDetail": None,
+        "pnu": None,
+        "soil_type_actual": False,
+        "source": "흙토람 (농진청)",
+    }
+
+    if not settings.soil_api_key:
+        result["source"] = "흙토람 (농진청, 미연동)"
+        return result
+
+    cache_key = f"soil:latlng:{round(lat, 5)}:{round(lng, 5)}"
+    cached = cache_get(cache_key)
+    if isinstance(cached, dict):
+        return cached
+
+    pnu: Optional[str] = None
+    try:
+        if settings.vworld_api_key:
+            pnu = await VWorldClient().resolve_pnu_at_point(lat, lng)
+    except Exception as exc:  # noqa: BLE001
+        logger.info("PNU resolve failed lat=%s lng=%s: %s", lat, lng, exc)
+
+    if not pnu:
+        cache_set(cache_key, result, 600.0)
+        return result
+
+    result["pnu"] = pnu
+    try:
+        soil = await soil_client().get_soil_type(pnu, fallback="UNKNOWN")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("soil enrich failed pnu=%s: %s", pnu, exc)
+        cache_set(cache_key, result, 300.0)
+        return result
+
+    if soil.get("dataAvailable") and soil.get("soilType"):
+        mapped = normalize_soil_type_for_api(str(soil["soilType"]))
+        if mapped != "UNKNOWN":
+            result["soilType"] = mapped
+            result["soilTypeLabel"] = soil.get("soilTypeLabel")
+            result["soilDetail"] = soil.get("soilDetail")
+            result["soil_type_actual"] = True
+            result["source"] = soil.get("source") or "흙토람 (농진청)"
+    else:
+        # 조회는 했으나 토양도 미제공(도심 등)
+        result["soilDetail"] = soil.get("soilDetail")
+        result["source"] = soil.get("source") or "흙토람 (농진청)"
+
+    cache_set(cache_key, result, 1800.0 if result["soil_type_actual"] else 600.0)
+    return result
 
 
 async def get_all_parcels(
@@ -139,6 +215,24 @@ async def get_parcel_detail(db: AsyncSession, parcel_id: str) -> Optional[Dict[s
     if not parcel:
         return None
 
+    # 시드 부지도 좌표→PNU→흙토람으로 실제 토양 보강
+    soil_enrich = await _enrich_soil_from_location(
+        float(parcel.lat),
+        float(parcel.lng),
+        existing_soil=str(parcel.soil_type or "UNKNOWN"),
+    )
+    soil_type = soil_enrich["soilType"]
+    soil_actual = bool(soil_enrich["soil_type_actual"])
+
+    # 실측 토양이면 DB에도 캐시해 다음 조회·목록 점수 입력으로 활용
+    if soil_actual and soil_type != parcel.soil_type:
+        try:
+            parcel.soil_type = soil_type
+            await db.commit()
+        except Exception as exc:  # noqa: BLE001
+            logger.warning("persist soil_type failed id=%s: %s", parcel_id, exc)
+            await db.rollback()
+
     score = parcel.scores
     parcel_dict = {
         "id": parcel.id,
@@ -150,7 +244,10 @@ async def get_parcel_detail(db: AsyncSession, parcel_id: str) -> Optional[Dict[s
         "areaSqm": parcel.area_sqm,
         "parcelType": parcel.parcel_type,
         "ownership": parcel.ownership,
-        "soilType": parcel.soil_type,
+        "soilType": soil_type,
+        "soilTypeLabel": soil_enrich.get("soilTypeLabel"),
+        "soilDetail": soil_enrich.get("soilDetail"),
+        "pnu": soil_enrich.get("pnu"),
         "solarIrradiance": parcel.solar_irradiance,
         "monthlyIrradiance": parcel.monthly_irradiance,
         "sunlightHours": parcel.sunlight_hours,
@@ -167,10 +264,14 @@ async def get_parcel_detail(db: AsyncSession, parcel_id: str) -> Optional[Dict[s
         "nearbyParks": parcel.nearby_parks,
         "nearbySubwayStations": parcel.nearby_subway_stations,
         "regulatoryRestriction": parcel.regulatory_restriction,
+        "regulations": parcel.regulations or [],
+        "sumokFeasibility": parcel.sumok_feasibility,
         "confidence": parcel.confidence,
+        "dataSource": "GreenSpot DB + 흙토람" if soil_actual else "GreenSpot DB",
         "dataProvenance": build_data_provenance(
             DEFAULT_DB_DATA_SOURCE,
             regulations=parcel.regulations,
+            soil_type_actual=soil_actual,
         ),
     }
 

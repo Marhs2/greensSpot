@@ -1,0 +1,1026 @@
+{
+  "scriptCompleted": true,
+  "files": [
+    {
+      "path": ".gitattributes",
+      "language": "unknown",
+      "sizeLines": 2,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/.understandignore",
+      "language": "unknown",
+      "sizeLines": 154,
+      "fileCategory": "code"
+    },
+    {
+      "path": ".understand-anything/config.json",
+      "language": "json",
+      "sizeLines": 3,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_backend/app/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/api/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/api/v1/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/api/v1/auth_router.py",
+      "language": "python",
+      "sizeLines": 320,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/api/v1/gs_router.py",
+      "language": "python",
+      "sizeLines": 258,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/api/v1/integration_router.py",
+      "language": "python",
+      "sizeLines": 389,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/constants/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/constants/seoul.py",
+      "language": "python",
+      "sizeLines": 7,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/core/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/core/config.py",
+      "language": "python",
+      "sizeLines": 94,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/db/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/db/database.py",
+      "language": "python",
+      "sizeLines": 158,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/models/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/models/models.py",
+      "language": "python",
+      "sizeLines": 200,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/schemas/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/schemas/schemas.py",
+      "language": "python",
+      "sizeLines": 319,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/agent_service.py",
+      "language": "python",
+      "sizeLines": 297,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/airkorea_service.py",
+      "language": "python",
+      "sizeLines": 192,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/auth_service.py",
+      "language": "python",
+      "sizeLines": 110,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/explain_service.py",
+      "language": "python",
+      "sizeLines": 155,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/export_service.py",
+      "language": "python",
+      "sizeLines": 54,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/kma_service.py",
+      "language": "python",
+      "sizeLines": 22,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/kosis_service.py",
+      "language": "python",
+      "sizeLines": 274,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/land_ownership_service.py",
+      "language": "python",
+      "sizeLines": 244,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/live_search_service.py",
+      "language": "python",
+      "sizeLines": 574,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/llm_service.py",
+      "language": "python",
+      "sizeLines": 62,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/parcel_service.py",
+      "language": "python",
+      "sizeLines": 429,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/report_service.py",
+      "language": "python",
+      "sizeLines": 134,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/simulation_service.py",
+      "language": "python",
+      "sizeLines": 262,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/soil_service.py",
+      "language": "python",
+      "sizeLines": 454,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/stats_service.py",
+      "language": "python",
+      "sizeLines": 143,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/ttl_cache.py",
+      "language": "python",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/visual_crossing_service.py",
+      "language": "python",
+      "sizeLines": 329,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/vworld_discovery_service.py",
+      "language": "python",
+      "sizeLines": 1140,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/app/services/vworld_service.py",
+      "language": "python",
+      "sizeLines": 544,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/docs/기능명세서.md",
+      "language": "markdown",
+      "sizeLines": 529,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/api.md",
+      "language": "markdown",
+      "sizeLines": 1365,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/BROWSER_TEST_RESULTS.md",
+      "language": "markdown",
+      "sizeLines": 242,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/HALLUCINATION_TEST_CASES.md",
+      "language": "markdown",
+      "sizeLines": 964,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/MANUAL_TEST_CASES.md",
+      "language": "markdown",
+      "sizeLines": 8,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/README.md",
+      "language": "markdown",
+      "sizeLines": 76,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/sql.md",
+      "language": "markdown",
+      "sizeLines": 296,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/docs/TEST_CASES.md",
+      "language": "markdown",
+      "sizeLines": 232,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/main.py",
+      "language": "python",
+      "sizeLines": 92,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/pyproject.toml",
+      "language": "toml",
+      "sizeLines": 9,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_backend/README.md",
+      "language": "markdown",
+      "sizeLines": 147,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/requirements.txt",
+      "language": "txt",
+      "sizeLines": 17,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_backend/run.bat",
+      "language": "batch",
+      "sizeLines": 3,
+      "fileCategory": "script"
+    },
+    {
+      "path": "greenSpot_backend/run.py",
+      "language": "python",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/scripts/fetch_vworld_seoul_parcels.py",
+      "language": "python",
+      "sizeLines": 85,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/scripts/generate_full_seoul_seed.py",
+      "language": "python",
+      "sizeLines": 192,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/scripts/seed_data.json",
+      "language": "json",
+      "sizeLines": 113250,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_backend/scripts/seed_meta.json",
+      "language": "json",
+      "sizeLines": 33,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_backend/scripts/seed.py",
+      "language": "python",
+      "sizeLines": 102,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/test.csv",
+      "language": "csv",
+      "sizeLines": 4,
+      "fileCategory": "data"
+    },
+    {
+      "path": "greenSpot_backend/tests/__init__.py",
+      "language": "python",
+      "sizeLines": 0,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/conftest.py",
+      "language": "python",
+      "sizeLines": 119,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_actual_api_integration.py",
+      "language": "python",
+      "sizeLines": 309,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_all_features.py",
+      "language": "python",
+      "sizeLines": 968,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_docs_acceptance.py",
+      "language": "python",
+      "sizeLines": 748,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_gs_router.py",
+      "language": "python",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_integration_router.py",
+      "language": "python",
+      "sizeLines": 223,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_kosis_service.py",
+      "language": "python",
+      "sizeLines": 386,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_live_search_service.py",
+      "language": "python",
+      "sizeLines": 449,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_report_service.py",
+      "language": "python",
+      "sizeLines": 69,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_simulation_service.py",
+      "language": "python",
+      "sizeLines": 139,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_vworld_discovery_service.py",
+      "language": "python",
+      "sizeLines": 191,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_backend/tests/test_vworld_land_info.py",
+      "language": "python",
+      "sizeLines": 387,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/.env.example",
+      "language": "config",
+      "sizeLines": 14,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_frontend/ATTRIBUTIONS.md",
+      "language": "markdown",
+      "sizeLines": 3,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/default_shadcn_theme.css",
+      "language": "css",
+      "sizeLines": 120,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/e2e/flows.spec.ts",
+      "language": "typescript",
+      "sizeLines": 121,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/e2e/smoke.spec.ts",
+      "language": "typescript",
+      "sizeLines": 81,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/guidelines/Guidelines.md",
+      "language": "markdown",
+      "sizeLines": 61,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/index.html",
+      "language": "html",
+      "sizeLines": 25,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/package.json",
+      "language": "json",
+      "sizeLines": 94,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_frontend/playwright.config.ts",
+      "language": "typescript",
+      "sizeLines": 29,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/pnpm-workspace.yaml",
+      "language": "yaml",
+      "sizeLines": 12,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_frontend/postcss.config.mjs",
+      "language": "javascript",
+      "sizeLines": 15,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/README.md",
+      "language": "markdown",
+      "sizeLines": 10,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/scripts/export-seed.mts",
+      "language": "mts",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/App.tsx",
+      "language": "typescript",
+      "sizeLines": 393,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/figma/ImageWithFallback.tsx",
+      "language": "typescript",
+      "sizeLines": 27,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/AgentPanel.tsx",
+      "language": "typescript",
+      "sizeLines": 176,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/AuthPages.tsx",
+      "language": "typescript",
+      "sizeLines": 267,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/BookmarkSheet.tsx",
+      "language": "typescript",
+      "sizeLines": 121,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/CompareDialog.tsx",
+      "language": "typescript",
+      "sizeLines": 153,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/DetailPanel.tsx",
+      "language": "typescript",
+      "sizeLines": 785,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/Header.tsx",
+      "language": "typescript",
+      "sizeLines": 191,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/ParcelList.tsx",
+      "language": "typescript",
+      "sizeLines": 233,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/StatsBar.tsx",
+      "language": "typescript",
+      "sizeLines": 36,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/greenspot/StatsView.tsx",
+      "language": "typescript",
+      "sizeLines": 329,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/accordion.tsx",
+      "language": "typescript",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/alert-dialog.tsx",
+      "language": "typescript",
+      "sizeLines": 157,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/alert.tsx",
+      "language": "typescript",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/aspect-ratio.tsx",
+      "language": "typescript",
+      "sizeLines": 11,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/avatar.tsx",
+      "language": "typescript",
+      "sizeLines": 53,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/badge.tsx",
+      "language": "typescript",
+      "sizeLines": 46,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/breadcrumb.tsx",
+      "language": "typescript",
+      "sizeLines": 109,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/button.tsx",
+      "language": "typescript",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/calendar.tsx",
+      "language": "typescript",
+      "sizeLines": 75,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/card.tsx",
+      "language": "typescript",
+      "sizeLines": 92,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/carousel.tsx",
+      "language": "typescript",
+      "sizeLines": 241,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/chart.tsx",
+      "language": "typescript",
+      "sizeLines": 353,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/checkbox.tsx",
+      "language": "typescript",
+      "sizeLines": 32,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/collapsible.tsx",
+      "language": "typescript",
+      "sizeLines": 33,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/command.tsx",
+      "language": "typescript",
+      "sizeLines": 177,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/context-menu.tsx",
+      "language": "typescript",
+      "sizeLines": 252,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/dialog.tsx",
+      "language": "typescript",
+      "sizeLines": 138,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/drawer.tsx",
+      "language": "typescript",
+      "sizeLines": 132,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/dropdown-menu.tsx",
+      "language": "typescript",
+      "sizeLines": 257,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/form.tsx",
+      "language": "typescript",
+      "sizeLines": 168,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/hover-card.tsx",
+      "language": "typescript",
+      "sizeLines": 44,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/input-otp.tsx",
+      "language": "typescript",
+      "sizeLines": 77,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/input.tsx",
+      "language": "typescript",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/label.tsx",
+      "language": "typescript",
+      "sizeLines": 24,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/menubar.tsx",
+      "language": "typescript",
+      "sizeLines": 276,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/navigation-menu.tsx",
+      "language": "typescript",
+      "sizeLines": 168,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/pagination.tsx",
+      "language": "typescript",
+      "sizeLines": 127,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/popover.tsx",
+      "language": "typescript",
+      "sizeLines": 48,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/progress.tsx",
+      "language": "typescript",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/radio-group.tsx",
+      "language": "typescript",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/resizable.tsx",
+      "language": "typescript",
+      "sizeLines": 56,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/scroll-area.tsx",
+      "language": "typescript",
+      "sizeLines": 58,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/select.tsx",
+      "language": "typescript",
+      "sizeLines": 189,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/separator.tsx",
+      "language": "typescript",
+      "sizeLines": 28,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/sheet.tsx",
+      "language": "typescript",
+      "sizeLines": 139,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/sidebar.tsx",
+      "language": "typescript",
+      "sizeLines": 726,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/skeleton.tsx",
+      "language": "typescript",
+      "sizeLines": 13,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/slider.tsx",
+      "language": "typescript",
+      "sizeLines": 63,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/sonner.tsx",
+      "language": "typescript",
+      "sizeLines": 25,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/switch.tsx",
+      "language": "typescript",
+      "sizeLines": 31,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/table.tsx",
+      "language": "typescript",
+      "sizeLines": 116,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/tabs.tsx",
+      "language": "typescript",
+      "sizeLines": 66,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/textarea.tsx",
+      "language": "typescript",
+      "sizeLines": 18,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/toggle-group.tsx",
+      "language": "typescript",
+      "sizeLines": 73,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/toggle.tsx",
+      "language": "typescript",
+      "sizeLines": 47,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/tooltip.tsx",
+      "language": "typescript",
+      "sizeLines": 61,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/use-mobile.ts",
+      "language": "typescript",
+      "sizeLines": 21,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/components/ui/utils.ts",
+      "language": "typescript",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/data/greenspot.ts",
+      "language": "typescript",
+      "sizeLines": 833,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/api.ts",
+      "language": "typescript",
+      "sizeLines": 470,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/auth.ts",
+      "language": "typescript",
+      "sizeLines": 191,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/greenspot-ui.tsx",
+      "language": "typescript",
+      "sizeLines": 46,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/parcelAdapter.ts",
+      "language": "typescript",
+      "sizeLines": 135,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/parcelStore.ts",
+      "language": "typescript",
+      "sizeLines": 189,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/app/lib/types.ts",
+      "language": "typescript",
+      "sizeLines": 273,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/imports/pasted_text/greenspot-feature-spec-tree-pl-1.md",
+      "language": "markdown",
+      "sizeLines": 663,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/src/imports/pasted_text/greenspot-feature-spec-tree-pl.md",
+      "language": "markdown",
+      "sizeLines": 663,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/src/imports/pasted_text/greenspot-v2-template-1.md",
+      "language": "markdown",
+      "sizeLines": 996,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/src/imports/pasted_text/greenspot-v2-template.md",
+      "language": "markdown",
+      "sizeLines": 1279,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/src/imports/pasted_text/service-overview.md",
+      "language": "markdown",
+      "sizeLines": 294,
+      "fileCategory": "docs"
+    },
+    {
+      "path": "greenSpot_frontend/src/main.tsx",
+      "language": "typescript",
+      "sizeLines": 6,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/src/styles/fonts.css",
+      "language": "css",
+      "sizeLines": 0,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/src/styles/globals.css",
+      "language": "css",
+      "sizeLines": 0,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/src/styles/index.css",
+      "language": "css",
+      "sizeLines": 3,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/src/styles/tailwind.css",
+      "language": "css",
+      "sizeLines": 4,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/src/styles/theme.css",
+      "language": "css",
+      "sizeLines": 181,
+      "fileCategory": "markup"
+    },
+    {
+      "path": "greenSpot_frontend/src/vite-env.d.ts",
+      "language": "typescript",
+      "sizeLines": 9,
+      "fileCategory": "code"
+    },
+    {
+      "path": "greenSpot_frontend/vercel.json",
+      "language": "json",
+      "sizeLines": 6,
+      "fileCategory": "config"
+    },
+    {
+      "path": "greenSpot_frontend/vite.config.ts",
+      "language": "typescript",
+      "sizeLines": 45,
+      "fileCategory": "code"
+    }
+  ],
+  "totalFiles": 165,
+  "filteredByIgnore": 0,
+  "estimatedComplexity": "large",
+  "stats": {
+    "filesScanned": 165,
+    "byCategory": {
+      "code": 130,
+      "config": 8,
+      "docs": 18,
+      "script": 1,
+      "data": 1,
+      "markup": 7
+    },
+    "byLanguage": {
+      "unknown": 2,
+      "json": 5,
+      "python": 54,
+      "markdown": 17,
+      "toml": 1,
+      "txt": 1,
+      "batch": 1,
+      "csv": 1,
+      "config": 1,
+      "css": 6,
+      "typescript": 72,
+      "html": 1,
+      "yaml": 1,
+      "javascript": 1,
+      "mts": 1
+    }
+  }
+}

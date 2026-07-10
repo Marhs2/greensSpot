@@ -18,46 +18,15 @@ def client():
 
 
 class TestKosisPopulation:
-    """GET /api/v1/gs/kosis/population endpoint integration tests."""
+    """F-25 KOSIS 공개 API 제거 확인."""
 
-    def test_population_known_district_returns_200(self, client):
-        mock_client = AsyncMock()
-        mock_client.get_population.return_value = {
-            "source": "kosis",
-            "district": "강남구",
-            "year": 2023,
-            "population": 12345,
-            "dataAvailable": True,
-        }
-        with patch("app.api.v1.integration_router.kosis_client", return_value=mock_client):
-            response = client.get("/api/v1/gs/kosis/population?district=강남구&year=2023")
+    def test_population_endpoint_removed(self, client):
+        response = client.get("/api/v1/gs/kosis/population?district=강남구&year=2023")
+        assert response.status_code == 404
 
-        assert response.status_code == 200
-        body = response.json()
-        assert body["district"] == "강남구"
-        assert body["year"] == 2023
-        assert body["population"] == 12345
-        assert body["dataAvailable"] is True
-        mock_client.get_population.assert_awaited_once_with("강남구", 2023)
-
-    def test_population_unknown_district_returns_400(self, client):
-        # 서울 25구는 매핑됨 — 미지원 지역명으로 400 검증
-        response = client.get("/api/v1/gs/kosis/population?district=해운대구")
-
-        assert response.status_code == 400
-        assert "해운대구" in response.json()["detail"]
-
-    def test_population_unconfigured_key_returns_400(self, client):
-        mock_client = AsyncMock()
-        from app.services.kosis_service import KosisNotConfigured
-
-        mock_client.get_population.side_effect = KosisNotConfigured("KOSIS_API_KEY unset")
-        with patch("app.api.v1.integration_router.kosis_client", return_value=mock_client):
-            with patch("app.core.config.settings.kosis_api_key", ""):
-                response = client.get("/api/v1/gs/kosis/population?district=강남구")
-
-        assert response.status_code == 400
-        assert "KOSIS_API_KEY" in response.json()["detail"]
+    def test_households_endpoint_removed(self, client):
+        response = client.get("/api/v1/gs/kosis/households?district=강남구")
+        assert response.status_code == 404
 
 
 class TestVisualCrossingClimate:

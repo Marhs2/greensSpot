@@ -37,7 +37,10 @@ function recomputeStats(list: Parcel[]): ParcelStats {
     avgSolarScore: list.length
       ? Math.round(list.reduce((a, p) => a + p.scores.solarScore, 0) / list.length)
       : 0,
-    topTreeCount: list.filter((p) => p.scores.topRecommendation === "SUMOK").length,
+    topTreeCount: list.filter((p) => {
+      const t = p.scores.topRecommendation;
+      return t === "SUMOK" || t === "TREE";
+    }).length,
     topGardenCount: list.filter((p) => p.scores.topRecommendation === "GARDEN").length,
     topSolarCount: list.filter((p) => p.scores.topRecommendation === "SOLAR").length,
     totalAreaSqm: Math.round(list.reduce((a, p) => a + (p.areaSqm || 0), 0)),

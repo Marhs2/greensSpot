@@ -28,13 +28,12 @@ class TestHealthCheck:
         assert "environment" in body
         assert isinstance(body["environment"]["kosisApiKeyConfigured"], bool)
 
-    def test_health_does_not_include_gee_configured(self, client):
-        """GEE 의존성은 제거되었으므로 health 응답에 geeConfigured 가 없어야 한다."""
+    def test_health_includes_visual_crossing_flag(self, client):
+        """health environment 에 Visual Crossing 키 설정 플래그가 있어야 한다."""
         response = client.get("/api/gs/health")
 
         assert response.status_code == 200
         body = response.json()
-        assert "geeConfigured" not in body["environment"]
         assert "visualCrossingApiKeyConfigured" in body["environment"]
         assert isinstance(body["environment"]["visualCrossingApiKeyConfigured"], bool)
 

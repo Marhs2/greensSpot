@@ -296,6 +296,33 @@ class VWorldClient:
             "year": year,
         }
 
+    async def resolve_pnu_at_point(
+        self,
+        lat: float,
+        lng: float,
+        radius_deg: float = 0.0004,
+    ) -> Optional[str]:
+        """좌표 주변 연속지적도(WFS)에서 가장 가까운 필지 PNU를 반환한다."""
+        try:
+            features = await self._get_feature(
+                "lp_pa_cbnd_bubun",
+                lat,
+                lng,
+                radius_deg,
+            )
+        except Exception:
+            return None
+        for feat in features:
+            if not isinstance(feat, dict):
+                continue
+            props = feat.get("properties") or {}
+            pnu = str(props.get("pnu") or props.get("PNU") or "").strip()
+            if len(pnu) >= 19 and pnu.isdigit():
+                return pnu[:19]
+            if len(pnu) >= 10:
+                return pnu
+        return None
+
     async def get_regulations_at_point(
         self, lat: float, lng: float, radius_deg: float = 0.0008,
         typenames: Optional[List[str]] = None,

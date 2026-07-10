@@ -60,15 +60,15 @@
 | 심각도 | P0 |
 | 비고 | 중복 등록(`/api/gs/history` 이중 등)도 기록 |
 
-### TC-A-002 GEE 엔드포인트 스코프
+### TC-A-002 Visual Crossing 열섬·기온
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim (기능명세 F-26 본문) | `GET /api/v1/gs/gee/lst`, `GET /api/v1/gs/gee/heat-island` 존재·수용 기준 |
-| Claim (기능명세 F-26 표 / README) | GEE 미제공, Visual Crossing 열섬 사용 |
-| 절차 | 1. 두 Claim 이 문서 내부에서 모순인지 확인 2. 실제 `GET /api/v1/gs/gee/lst` 호출 |
-| DRIFT | 문서 내부 모순; 또는 “미제공”인데 200; 또는 본문대로인데 404 |
-| 심각도 | P0 (문서 자기모순 + 구현 확인) |
+| Claim | 열섬·일사·기온은 **Visual Crossing** (`/api/v1/gs/visualcrossing/climate\|heat\|timeline` 및 라이브 enrich) |
+| 절차 | 1. openapi에 visualcrossing 경로 존재 2. `GET /api/v1/gs/visualcrossing/heat` 호출 |
+| DRIFT | VC heat/climate 미존재 |
+| MATCH | VC heat/climate/timeline 존재 |
+| 심각도 | P1 |
 
 ### TC-A-003 관리자 API 부재
 
@@ -98,14 +98,14 @@
 | DRIFT | 문서가 “통일됨”으로 읽히는데 한쪽만 동작; 또는 둘 다 동작해 문서 설명과 불일치 |
 | 심각도 | P1 |
 
-### TC-A-006 trending/history 이중 마운트
+### TC-A-006 trending/history 미제공
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim | `GET /api/gs/trending`, `GET /api/gs/history` 단일 정의 |
-| 절차 | openapi·라우트 등록 소스에서 동일 path 중복 여부, 응답 동일성 |
-| DRIFT | 동일 path가 서로 다른 핸들러/스키마로 충돌 또는 문서 미기재 중복 |
-| 심각도 | P2 |
+| Claim | `GET /api/gs/trending`, `GET /api/gs/history` 는 **미제공 (404)** |
+| 절차 | 각 path 호출 → 404 |
+| DRIFT | 문서/OpenAPI에 살아 있거나 200 응답 |
+| 심각도 | P1 |
 
 ---
 
@@ -233,14 +233,14 @@
 | DRIFT | camelCase/snake_case 혼선 |
 | 심각도 | P1 |
 
-### TC-B-014 User me 필드
+### TC-B-014 User 필드 (login 응답)
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim | id, email, created_at (구현 UserResponse) |
-| 절차 | `GET /api/users/me` |
-| DRIFT | 문서에 name/role 이 있는데 없거나 그 반대 |
-| 심각도 | P2 |
+| Claim | `GET /api/users/me` 미제공. 사용자 정보는 login 응답 `user` (`id`, `email`, `created_at`) |
+| 절차 | `GET /api/users/me` → 404; login 응답에 `user` 포함 |
+| DRIFT | me 엔드포인트 문서/구현 잔존; login에 user 없음 |
+| 심각도 | P1 |
 
 ---
 
@@ -250,17 +250,17 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim | 목록/상세/검색/시뮬/비교/리포트/공유조회·발급 등 비회원 가능; 북마크·me·preferences 회원 |
+| Claim | 목록/상세/검색/시뮬/비교/리포트/공유 발급 등 비회원 가능; 북마크만 회원. me·preferences 미제공 |
 | 절차 | Authorization 없이 각 엔드포인트 호출 → 401 여부 표 작성 |
 | DRIFT | 문서 “비회원 가능”인데 401; 문서 “회원 전용”인데 200 |
 | 심각도 | P0 |
 
-### TC-C-002 리포트·CSV·history 권한
+### TC-C-002 리포트·CSV 권한
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim (명세 각주) | 초안은 회원 전용이었으나 구현은 인증 없이 허용 |
-| 절차 | 무토큰으로 report/export/history |
+| Claim (명세 각주) | 초안은 회원 전용이었으나 구현은 인증 없이 허용. history API 미제공 |
+| 절차 | 무토큰으로 report/export |
 | DRIFT | 문서 본문이 아직 “회원 전용”으로 읽히고 구현은 공개(또는 반대) |
 | 심각도 | P1 |
 
@@ -449,14 +449,14 @@
 | HALLUC | 쿨다운 중 이전 성공값을 actual true 로 재사용하거나, 실패를 성공으로 표시 |
 | 심각도 | P1 |
 
-### TC-E-009 출처 문자열 정직성 (Landsat/기상청 등)
+### TC-E-009 출처 문자열 정직성 (Visual Crossing 등)
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim | explain 규칙: USDA i-Tree / 기상청 / KOSIS / Landsat / 서울연구원 명시 |
-| 구현 실사용 | 열섬·일사 = Visual Crossing (GEE/Landsat 미제공 문서와 충돌 가능) |
-| 절차 | explain 본문에 Landsat/기상청 등장 여부 vs 실제 파이프라인 |
-| HALLUC | 사용하지 않는 출처를 실측 근거처럼 기재 |
+| Claim | explain 출처: VWorld / AirKorea / Visual Crossing / KOSIS / GreenSpot |
+| 구현 실사용 | 열섬·일사 = Visual Crossing |
+| 절차 | explain 본문 출처가 실연동과 모순되지 않는지 |
+| HALLUC | 미사용 출처를 실측 근거처럼 기재 |
 | 심각도 | P0 |
 
 ### TC-E-010 KOSIS dataAvailable 와 nearbyHouseholds
@@ -585,13 +585,13 @@
 | DRIFT | 100 그대로 또는 문서와 다른 cap |
 | 심각도 | P2 |
 
-### TC-G-007 히스토리 기록 정합
+### TC-G-007 AgentQuery 로그 (공개 history 없음)
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim | AgentQuery 저장 → history/trending |
-| 절차 | 고유 쿼리 후 history 최신 항목 query/criteria/resultCount |
-| DRIFT | 미기록; resultCount≠실제 count; criteria 왜곡 |
+| Claim | agent 호출 시 `AgentQuery` 저장. 공개 `history`/`trending` API는 미제공 (404) |
+| 절차 | 고유 쿼리 후 DB AgentQuery 행 확인; GET /api/gs/history → 404 |
+| DRIFT | 미기록; 공개 history 엔드포인트 잔존 |
 | 심각도 | P1 |
 
 ### TC-G-008 liveMeta 필드
@@ -794,7 +794,7 @@
 
 | 항목 | 내용 |
 | --- | --- |
-| Claim 예 | estimatedAcquisitionCostWon, dataSource, kosisPopulationSnapshot, geeLstSnapshot, name on User, Scenario.aiExplanation … |
+| Claim 예 | estimatedAcquisitionCostWon, dataSource, kosisPopulationSnapshot, name on User, Scenario.aiExplanation … |
 | 절차 | models.Parcel/User/Scenario 컬럼 존재 여부 |
 | DRIFT | 문서 DDL 에만 있고 구현 없음 (과대 스키마 문서) |
 | 심각도 | P1 |
@@ -874,8 +874,8 @@
 | S-03 | api.md `regulations: "NONE"` 문자열 예시 vs 구현 배열 | B-005 |
 | S-04 | 시드 ID 예 `DD-001` vs 실제 `VW-` 단축 시드 | B-007 |
 | S-05 | Compare max_length=3 문서 미기재 | B-008 |
-| S-06 | F-26 GEE 본문 vs “미제공” 표 자기모순 | A-002 |
-| S-07 | explain fallback/prompt 출처에 Landsat·기상청 (파이프라인은 VC) | E-009, H-005 |
+| S-06 | 열섬·일사 출처는 Visual Crossing | A-002 |
+| S-07 | explain 출처는 Visual Crossing 등 실연동과 일치해야 함 | E-009, H-005 |
 | S-08 | promptVersion 문서 v3-greenspot2 vs 코드 v3-greenspot3 | B-010 |
 | S-09 | health 가 DB 실패에도 healthy 일 수 있음 | L-001 |
 | S-10 | DB nearby* 가 0 (라이브 null 정책과 이원화) | E-005 |
@@ -947,7 +947,7 @@ TC-ID:
 | F-16~17 History/Trend | G-007, A-006 |
 | F-18 Health | B-011, L-* |
 | F-25 KOSIS | J-001~002, E-010 |
-| F-26 GEE | A-002 |
+| Visual Crossing 열섬 | A-002 |
 | F-27 Provenance | E-* |
 | F-28 Live | D-*, G-001 |
 

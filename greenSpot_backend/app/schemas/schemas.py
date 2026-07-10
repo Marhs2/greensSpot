@@ -19,12 +19,6 @@ class RefreshRequest(BaseModel):
     refresh_token: str
 
 
-class TokenResponse(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
-
-
 class UserResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -33,14 +27,12 @@ class UserResponse(BaseModel):
     created_at: datetime
 
 
-class UserPreferencesRequest(BaseModel):
-    theme: Optional[str] = Field(None, pattern="^(light|dark|system)$")
-
-
-class UserPreferencesResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    theme: str
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    # F-20 제거 후 로그인 응답에 사용자 정보 포함 (별도 GET /users/me 없음)
+    user: Optional[UserResponse] = None
 
 
 # ========== Parcel Schemas ==========
@@ -186,19 +178,6 @@ class StatsResponse(BaseModel):
     generatedAt: datetime
 
 
-class TrendingResponse(BaseModel):
-    totalQueries: int
-    topKeywords: List[Dict[str, Any]]
-    topDistricts: List[Dict[str, Any]]
-    recentQueries: List[str]
-    generatedAt: datetime
-
-
-class HistoryResponse(BaseModel):
-    history: List[Dict[str, Any]]
-    total: int
-
-
 # ========== Bookmark Schemas ==========
 
 class BookmarkResponse(BaseModel):
@@ -265,24 +244,6 @@ class VWorldLandCharacteristicsResponse(BaseModel):
     source: str = "vworld"
     dataAvailable: bool
     year: str
-
-
-# ========== KOSIS Schemas ==========
-
-class KosisPopulationResponse(BaseModel):
-    district: str
-    year: int
-    population: Optional[int] = None
-    source: str = "kosis"
-    dataAvailable: bool
-
-
-class KosisHouseholdResponse(BaseModel):
-    district: str
-    year: int
-    households: Optional[int] = None
-    source: str = "kosis"
-    dataAvailable: bool
 
 
 class VisualCrossingClimateResponse(BaseModel):

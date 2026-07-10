@@ -250,6 +250,8 @@ def _internal_to_api(row: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any
         "landCategory": row.get("land_category"),
         "ownership": row["ownership"],
         "soilType": row["soil_type"],
+        "soilTypeLabel": row.get("soil_type_label"),
+        "soilDetail": row.get("soil_detail"),
         "solarIrradiance": row["solar_irradiance"],
         "monthlyIrradiance": row.get("monthly_irradiance"),
         "sunlightHours": row["sunlight_hours"],

@@ -5,21 +5,18 @@ from sqlalchemy import select
 from typing import List, Optional
 from app.db.database import get_db
 from app.core.config import settings
-from app.models.models import Bookmark, Parcel, User, UserPreference
+from app.models.models import Bookmark, Parcel, User
 from app.services.auth_service import (
     create_user, get_user_by_email, verify_password,
     create_access_token, create_refresh_token_db,
     validate_refresh_token, revoke_refresh_token, generate_id
 )
 from app.services.parcel_service import get_parcel_by_id
-from app.services.stats_service import get_trending, get_history
 from app.schemas.schemas import (
     SignupRequest, LoginRequest, RefreshRequest, TokenResponse,
-    UserResponse, UserPreferencesRequest, UserPreferencesResponse,
+    UserResponse,
     BookmarkResponse, BookmarkCreateRequest, BookmarkCreateResponse, BookmarkDeleteResponse,
-    ShareCreateRequest, ShareCreateResponse, TrendingResponse, HistoryResponse,
-    HealthResponse, ParcelListResponse, ParcelDetailResponse, AgentSearchResponse,
-    ExplainResponse, ScenarioResponse, CompareResponse, StatsResponse
+    ShareCreateRequest, ShareCreateResponse,
 )
 from datetime import datetime
 
@@ -76,7 +73,11 @@ async def login(request: LoginRequest, db: AsyncSession = Depends(get_db)):
         )
     access_token = create_access_token(user.id)
     refresh_token = await create_refresh_token_db(db, user.id)
-    return TokenResponse(access_token=access_token, refresh_token=refresh_token)
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        user=UserResponse(id=user.id, email=user.email, created_at=user.created_at),
+    )
 
 
 @router.post("/auth/refresh", response_model=TokenResponse)
@@ -98,15 +99,6 @@ async def refresh(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
 async def logout(request: RefreshRequest, db: AsyncSession = Depends(get_db)):
     await revoke_refresh_token(db, request.refresh_token)
     return {"ok": True}
-
-
-@router.get("/users/me", response_model=UserResponse)
-async def get_me(current_user: User = Depends(get_current_user)):
-    return UserResponse(
-        id=current_user.id,
-        email=current_user.email,
-        created_at=current_user.created_at,
-    )
 
 
 @router.get("/bookmarks", response_model=BookmarkResponse)
@@ -281,41 +273,3 @@ async def create_share(request: ShareCreateRequest, db: AsyncSession = Depends(g
         shareId=share_id,
         url=url,
     )
-
-
-@router.patch("/users/me/preferences", response_model=UserPreferencesResponse)
-async def update_preferences(
-    request: UserPreferencesRequest,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db),
-):
-    result = await db.execute(
-        select(UserPreference).where(UserPreference.user_id == current_user.id)
-    )
-    pref = result.scalar_one_or_none()
-
-    if not pref:
-        pref = UserPreference(
-            id=generate_id(),
-            user_id=current_user.id,
-            theme=request.theme or "system",
-        )
-        db.add(pref)
-    else:
-        if request.theme:
-            pref.theme = request.theme
-
-    await db.commit()
-    return UserPreferencesResponse(theme=pref.theme)
-
-
-@router.get("/gs/trending", response_model=TrendingResponse)
-async def get_trending_endpoint(db: AsyncSession = Depends(get_db)):
-    data = await get_trending(db)
-    return TrendingResponse(**data)
-
-
-@router.get("/gs/history", response_model=HistoryResponse)
-async def get_history_endpoint(limit: int = Query(20, le=100), db: AsyncSession = Depends(get_db)):
-    data = await get_history(db, limit)
-    return HistoryResponse(**data)

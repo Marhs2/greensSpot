@@ -46,8 +46,8 @@
 | 항목 | 내용 |
 | --- | --- |
 | Claim | 실제 사용 파이프라인 출처만 정직하게 |
-| 관측 | `POST /api/gs/parcels/JG-001/explain` fallback 본문에 **Landsat**, **기상청** 명시 |
-| | 구현 열섬/일사는 Visual Crossing (GEE/Landsat 미제공) |
+| 관측 | explain 출처는 Visual Crossing 등 실연동과 일치해야 함 (과거 레거시 문구 수정됨) |
+| | 구현 열섬/일사는 Visual Crossing |
 | 스니펫 | `데이터 출처: USDA i-Tree, 기상청, KOSIS, Landsat, 서울연구원` |
 | 권고 | **코드 수정**: fallback/system prompt 출처를 VC·VWorld·AirKorea 등으로 정합 |
 
@@ -158,7 +158,7 @@
 
 | TC | 결과 | 증거 요약 |
 | --- | --- | --- |
-| TC-A-002 GEE 없음 | MATCH | openapi 무경로, HTTP 404 |
+| TC-A-002 Visual Crossing heat | MATCH | VC 경로 존재 |
 | TC-A-003 admin 없음 | MATCH | 404 |
 | TC-A-005 `/api/v1/gs/parcels` 없음 | MATCH | 404 |
 | TC-B-001 목록 키 | MATCH | parcels/stats/source, n=63 |
@@ -235,7 +235,7 @@ console.log(r.parcel.regulations, r.parcel.sumokFeasibility, r.parcel.dataProven
 문서·구현 감사 관점에서 **가장 위험한 확정 이슈 4건**:
 
 1. **시드 상세가 VWorld 실측처럼 provenance 표기** (HALLUC)  
-2. **Explain이 Landsat/기상청을 출처로 상시 출력** (HALLUC)  
+2. **Explain 출처가 실연동(Visual Crossing 등)과 일치해야 함** (HALLUC)  
 3. **상세 API가 목록에 있는 규제·수목가능성 필드를 빠뜨림** (DRIFT / F-02 위반)  
 4. **solarScore=110 이 다수 존재** (DRIFT / 0~100 위반)
 
